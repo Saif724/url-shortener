@@ -3,15 +3,16 @@ package url
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 )
 
 type Handler struct {
-	service Service
+	service *Service
 }
 
 func NewHandler(service *Service) *Handler {
 	return &Handler{
-		service: *service,
+		service: service,
 	}
 }
 
@@ -25,18 +26,44 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 		URL string `json:"url"`
 	}
 
-	json.NewDecoder(r.Body).Decode(&body)
+	err := json.NewDecoder(r.Body).Decode(&body)
+
+	if err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
 
 	if body.URL == "" {
 		http.Error(w, "URL required", http.StatusBadRequest)
 		return
 	}
 
-	id := h.service.Shorten(body.URL)
+	_, err = url.ParseRequestURI(body.URL)
 
-	json.NewEncoder(w).Encode(map[string]string{
-		"id": id,
+	if err != nil {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+	id, err := h.service.Shorten(body.URL)
+
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusCreated)
+
+	err = json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"data": map[string]string{
+			"short_url": "http://localhost:8080/r/" + id,
+		},
 	})
+
+	if err != nil {
+		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		return
+	}
 }
 
 func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {

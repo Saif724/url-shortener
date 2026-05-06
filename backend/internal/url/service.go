@@ -25,7 +25,7 @@ func generateID() string {
 	return string(b)
 }
 
-func (s *Service) Shorten(original string) string {
+func (s *Service) Shorten(original string) (string, error) {
 	id := generateID()
 
 	url := URL{
@@ -33,9 +33,13 @@ func (s *Service) Shorten(original string) string {
 		URL: original,
 	}
 
-	s.store.Save(url)
+	err := s.store.Save(url)
 
-	return id
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
 }
 
 func (s *Service) Resolve(id string) (string, bool) {
