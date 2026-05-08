@@ -4,18 +4,13 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"urlshortener/backend/internal/middleware"
 	"urlshortener/backend/internal/url"
 )
 
 func main() {
 
-	os.Setenv("host", "127.0.0.1")
-	os.Setenv("port", "5432")
-	os.Setenv("user", "postgres")
-	os.Setenv("password", "2023")
-	os.Setenv("dbname", "url_shortener")
-	os.Setenv("sslmode", "disable")
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", os.Getenv("host"), os.Getenv("port"), os.Getenv("user"), os.Getenv("password"), os.Getenv("dbname"), os.Getenv("sslmode"))
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_SSLMODE"))
 
 	store, err := url.NewPostgresStore(connStr)
 	if err != nil {
@@ -25,9 +20,12 @@ func main() {
 	service := url.NewService(store)
 	handler := url.NewHandler(service)
 
-	http.HandleFunc("/shorten", handler.Shorten)
-	http.HandleFunc("/r/", handler.Redirect)
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/shorten", handler.Shorten)
+	mux.HandleFunc("/r/", handler.Redirect)
 
 	fmt.Println("Server running on :8080")
-	http.ListenAndServe(":8080", nil)
+	handleWithLogging := middleware.Logger(mux)
+	http.ListenAndServe(":8080", handleWithLogging)
 }
