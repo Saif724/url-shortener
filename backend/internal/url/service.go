@@ -16,7 +16,7 @@ func NewService(store Store) *Service {
 
 func generateID() string {
 	const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	b := make([]byte, 6)
+	b := make([]byte, 8)
 
 	for i := range b {
 		b[i] = chars[(rand.Intn(len(chars)))]
@@ -26,6 +26,12 @@ func generateID() string {
 }
 
 func (s *Service) Shorten(original string) (string, error) {
+
+	existing, ok := s.store.GetByURL(original)
+	if ok {
+		return existing.ID, nil
+	}
+
 	id := generateID()
 
 	url := URL{

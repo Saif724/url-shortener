@@ -6,9 +6,13 @@ import (
 	"os"
 	"urlshortener/backend/internal/middleware"
 	"urlshortener/backend/internal/url"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
+
+	godotenv.Load()
 
 	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_SSLMODE"))
 
@@ -26,6 +30,9 @@ func main() {
 	mux.HandleFunc("/r/", handler.Redirect)
 
 	fmt.Println("Server running on :8080")
+
 	handleWithLogging := middleware.Logger(mux)
-	http.ListenAndServe(":8080", handleWithLogging)
+	handleWithRequestID := middleware.RequestID(handleWithLogging)
+
+	http.ListenAndServe(":8080", handleWithRequestID)
 }

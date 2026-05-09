@@ -13,10 +13,13 @@ func Logger(next http.Handler) http.Handler {
 		fmt.Println("--- DEBUG: Request Received ---")
 		start := time.Now()
 
+		requestID := r.Context().Value(RequestIDKey)
+
 		next.ServeHTTP(w, r)
 
 		log.Printf(
-			"METHOD: %s | PATH: %s | DURATION: %s",
+			"[%s] METHOD: %s | PATH: %s | DURATION: %s",
+			requestID,
 			r.Method,
 			r.URL.Path,
 			time.Since(start),

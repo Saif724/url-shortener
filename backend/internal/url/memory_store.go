@@ -28,3 +28,14 @@ func (m *MemoryStore) Get(id string) (URL, bool) {
 	url, ok := m.data[id]
 	return url, ok
 }
+
+func (m *MemoryStore) GetByURL(original string) (URL, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	for _, url := range m.data {
+		if url.URL == original {
+			return url, true
+		}
+	}
+	return URL{}, false
+}
