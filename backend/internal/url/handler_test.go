@@ -11,7 +11,7 @@ import (
 func TestShortenHandler(t *testing.T) {
 	store := NewMemoryStore()
 	service := NewService(store)
-	handler := NewHandler(service)
+	handler := NewHandler(service, nil)
 
 	body := map[string]string{"url": "https://google.com"}
 	bodyBytes, _ := json.Marshal(body)
@@ -41,7 +41,7 @@ func TestShortenHandler(t *testing.T) {
 func TestShortenHandlerEmptyURl(t *testing.T) {
 	store := NewMemoryStore()
 	service := NewService(store)
-	handler := NewHandler(service)
+	handler := NewHandler(service, nil)
 
 	body := map[string]string{"url": ""}
 	bodyBytes, _ := json.Marshal(body)
@@ -61,7 +61,7 @@ func TestShortenHandlerEmptyURl(t *testing.T) {
 func TestShortenHandlerInvalidURL(t *testing.T) {
 	store := NewMemoryStore()
 	service := NewService(store)
-	handler := NewHandler(service)
+	handler := NewHandler(service, nil)
 
 	body := map[string]string{"url": "jesata.com"}
 	bodyBytes, _ := json.Marshal(body)

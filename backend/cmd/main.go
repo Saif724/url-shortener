@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"urlshortener/backend/internal/cache"
 	"urlshortener/backend/internal/middleware"
 	"urlshortener/backend/internal/url"
 
@@ -21,8 +22,14 @@ func main() {
 		panic(err)
 	}
 
+	redisCache := cache.NewRedisCache(
+		os.Getenv("REDIS_HOST"),
+		os.Getenv("REDIS_PORT"),
+	)
+	defer redisCache.Close()
+
 	service := url.NewService(store)
-	handler := url.NewHandler(service)
+	handler := url.NewHandler(service, redisCache)
 
 	mux := http.NewServeMux()
 

@@ -4,15 +4,19 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"time"
+	"urlshortener/backend/internal/cache"
 )
 
 type Handler struct {
 	service *Service
+	cache   *cache.RedisCache
 }
 
-func NewHandler(service *Service) *Handler {
+func NewHandler(service *Service, cache *cache.RedisCache) *Handler {
 	return &Handler{
 		service: service,
+		cache:   cache,
 	}
 }
 
@@ -69,6 +73,12 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 	id := r.URL.Path[len("/r/"):]
 
+	cachedURL, err := h.cache.Get(r.Context(), id)
+	if err == nil && cachedURL != "" {
+		http.Redirect(w, r, cachedURL, http.StatusFound)
+		return
+	}
+
 	url, ok := h.service.Resolve(id)
 
 	if !ok {
@@ -76,5 +86,6 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.cache.Set(r.Context(), id, url, 24*time.Hour)
 	http.Redirect(w, r, url, http.StatusFound)
 }
