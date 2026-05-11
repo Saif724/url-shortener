@@ -31,6 +31,8 @@ func main() {
 	service := url.NewService(store)
 	handler := url.NewHandler(service, redisCache)
 
+	rateLimiter := middleware.RateLimiter(5, 0.1)
+
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/shorten", handler.Shorten)
@@ -38,7 +40,8 @@ func main() {
 
 	fmt.Println("Server running on :8080")
 
-	handleWithLogging := middleware.Logger(mux)
+	handleWithRateLimit := rateLimiter(mux)
+	handleWithLogging := middleware.Logger(handleWithRateLimit)
 	handleWithRequestID := middleware.RequestID(handleWithLogging)
 
 	http.ListenAndServe(":8080", handleWithRequestID)
