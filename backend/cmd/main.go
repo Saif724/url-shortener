@@ -31,7 +31,8 @@ func main() {
 	service := url.NewService(store)
 	handler := url.NewHandler(service, redisCache)
 
-	rateLimiter := middleware.RateLimiter(5, 0.1)
+	rateLimiter := middleware.RateLimiter(10, 1)
+	corsMiddleware := middleware.CORS([]string{"http://localhost:3000", "*"})
 
 	mux := http.NewServeMux()
 
@@ -43,6 +44,6 @@ func main() {
 	handleWithRateLimit := rateLimiter(mux)
 	handleWithLogging := middleware.Logger(handleWithRateLimit)
 	handleWithRequestID := middleware.RequestID(handleWithLogging)
-
-	http.ListenAndServe(":8080", handleWithRequestID)
+	handleWithCors := corsMiddleware(handleWithRequestID)
+	http.ListenAndServe(":8080", handleWithCors)
 }

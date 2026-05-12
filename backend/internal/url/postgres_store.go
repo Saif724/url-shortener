@@ -36,7 +36,7 @@ func (p *PostgresStore) Get(id string) (URL, bool) {
 	row := p.db.QueryRow(query, id)
 
 	var url URL
-	err := row.Scan(&url.ID, &url.URL)
+	err := row.Scan(&url.ID, &url.URL, &url.CreatedAt)
 
 	if err != nil {
 		return URL{}, false
@@ -50,7 +50,7 @@ func (p *PostgresStore) GetByURL(original string) (URL, bool) {
 	row := p.db.QueryRow(query, original)
 
 	var url URL
-	err := row.Scan(&url.ID, &url.URL)
+	err := row.Scan(&url.ID, &url.URL, &url.CreatedAt)
 
 	if err != nil {
 		return URL{}, false
