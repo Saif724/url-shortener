@@ -26,13 +26,13 @@ func NewPostgresStore(connStr string) (*PostgresStore, error) {
 }
 
 func (p *PostgresStore) Save(url URL) error {
-	query := `insert into urls (id, original_url) values ($1,$2)`
+	query := `insert into urls (id, original_url, created_at) values ($1,$2, NOW())`
 	_, err := p.db.Exec(query, url.ID, url.URL)
 	return err
 }
 
 func (p *PostgresStore) Get(id string) (URL, bool) {
-	query := `select id,original_url from urls where id=$1`
+	query := `select id,original_url, created_at from urls where id=$1`
 	row := p.db.QueryRow(query, id)
 
 	var url URL
@@ -46,7 +46,7 @@ func (p *PostgresStore) Get(id string) (URL, bool) {
 }
 
 func (p *PostgresStore) GetByURL(original string) (URL, bool) {
-	query := `select id,original_url from urls where original_url=$1`
+	query := `select id,original_url, created_at from urls where original_url=$1`
 	row := p.db.QueryRow(query, original)
 
 	var url URL

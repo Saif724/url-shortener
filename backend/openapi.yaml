@@ -1,0 +1,150 @@
+openapi: 3.0.0
+info:
+  title: URL Shortener API
+  description: A simple URL shortening service with caching and rate limiting
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: URL
+    description: URL shortening operations
+
+paths:
+  /shorten:
+    post:
+      summary: Create a shortened URL
+      description: Takes a long URL and returns a short ID. If URL already exists, returns existing ID.
+      operationId: shortenURL
+      tags:
+        - URL
+      requestBody:
+        required: true
+        description: The URL to shorten
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+                  format: uri
+                  description: The long URL to shorten
+                  example: https://www.google.com/search?q=golang
+              required:
+                - url
+      responses:
+        '201':
+          description: URL shortened successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      short_url:
+                        type: string
+                        description: The shortened URL
+                        example: http://localhost:8080/r/YjMjspge
+                    required:
+                      - short_url
+                required:
+                  - success
+                  - data
+        '400':
+          description: Bad request - invalid or missing URL
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many requests - rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /r/{id}:
+    get:
+      summary: Resolve a shortened URL
+      description: Redirects to the original long URL. Uses Redis caching for fast lookups.
+      operationId: resolveURL
+      tags:
+        - URL
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The short URL ID
+          schema:
+            type: string
+            example: YjMjspge
+      responses:
+        '302':
+          description: Redirect to original URL
+          headers:
+            Location:
+              description: The original long URL
+              schema:
+                type: string
+                example: https://www.google.com/search?q=golang
+        '404':
+          description: Short URL not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Too many requests - rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: Invalid URL
+      required:
+        - error
+
+    URL:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Short URL ID
+          example: YjMjspge
+        url:
+          type: string
+          description: Original long URL
+          example: https://www.google.com
+        created_at:
+          type: string
+          format: date-time
+          description: When the short URL was created
+          example: 2026-05-09T15:06:12Z
+      required:
+        - id
+        - url
+        - created_at

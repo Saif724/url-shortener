@@ -8,6 +8,8 @@ RUN go mod download
 
 COPY backend/ ./backend/
 
+COPY backend/openapi.yaml ./openapi.yaml
+
 RUN go build -o main ./backend/cmd/main.go
 
 # Install migrate tool
