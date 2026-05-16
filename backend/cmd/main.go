@@ -7,6 +7,7 @@ import (
 	"urlshortener/backend/internal/cache"
 	"urlshortener/backend/internal/middleware"
 	"urlshortener/backend/internal/url"
+	"urlshortener/backend/internal/user"
 
 	"github.com/joho/godotenv"
 )
@@ -82,11 +83,22 @@ func main() {
 	handler := url.NewHandler(service, redisCache)
 
 	rateLimiter := middleware.RateLimiter(10, 1)
-	corsMiddleware := middleware.CORS([]string{"http://localhost:3000", "*"})
+	corsMiddleware := middleware.CORS([]string{"http://localhost:3000", "http://localhost:8080", "*"})
+	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		jwtSecret = "your-secret-key-change-in-production"
+	}
+
+	jwtService := user.NewJWTService(jwtSecret)
+	userHandler := user.NewUserHandler(*jwtService)
+
+	authMiddleware := middleware.Auth(jwtSecret)
+	shortenHandler := authMiddleware(http.HandlerFunc(handler.Shorten))
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/shorten", handler.Shorten)
+	mux.Handle("/shorten", shortenHandler)
 	mux.HandleFunc("/r/", handler.Redirect)
+	mux.HandleFunc("/login", userHandler.Login)
 
 	mux.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
