@@ -79,26 +79,39 @@ func main() {
 	)
 	defer redisCache.Close()
 
-	service := url.NewService(store)
-	handler := url.NewHandler(service, redisCache)
-
-	rateLimiter := middleware.RateLimiter(10, 1)
-	corsMiddleware := middleware.CORS([]string{"http://localhost:3000", "http://localhost:8080", "*"})
 	jwtSecret := os.Getenv("JWT_SECRET")
 	if jwtSecret == "" {
-		jwtSecret = "your-secret-key-change-in-production"
+		jwtSecret = "your-secret-key"
 	}
 
 	jwtService := user.NewJWTService(jwtSecret)
-	userHandler := user.NewUserHandler(*jwtService)
+
+	urlService := url.NewService(store)
+
+	userStore := user.NewPostgresUserStore(store.DB())
+	userService := user.NewUserService(userStore, jwtService)
+
+	urlHandler := url.NewHandler(urlService, redisCache)
+	userHandler := user.NewUserHandler(userService)
 
 	authMiddleware := middleware.Auth(jwtSecret)
-	shortenHandler := authMiddleware(http.HandlerFunc(handler.Shorten))
+
+	rateLimiter := middleware.RateLimiter(10, 1)
+
+	corsMiddleware := middleware.CORS([]string{
+		"http://localhost:3000",
+		"http://localhost:8080",
+		"*",
+	})
 
 	mux := http.NewServeMux()
-	mux.Handle("/shorten", shortenHandler)
-	mux.HandleFunc("/r/", handler.Redirect)
+
 	mux.HandleFunc("/login", userHandler.Login)
+	mux.HandleFunc("/register", userHandler.Register)
+	mux.HandleFunc("/r/", urlHandler.Redirect)
+
+	shortenHandler := authMiddleware(http.HandlerFunc(urlHandler.Shorten))
+	mux.Handle("/shorten", shortenHandler)
 
 	mux.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -110,11 +123,14 @@ func main() {
 		http.ServeFile(w, r, "openapi.yaml")
 	})
 
+	var handler http.Handler = mux
+
+	handler = rateLimiter(handler)
+	handler = corsMiddleware(handler)
+	handler = middleware.Logger(handler)
+	handler = middleware.RequestID(handler)
+
 	fmt.Println("Server running on :8080")
 
-	handleWithRateLimit := rateLimiter(mux)
-	handleWithLogging := middleware.Logger(handleWithRateLimit)
-	handleWithRequestID := middleware.RequestID(handleWithLogging)
-	handleWithCors := corsMiddleware(handleWithRequestID)
-	http.ListenAndServe(":8080", handleWithCors)
+	http.ListenAndServe(":8080", handler)
 }

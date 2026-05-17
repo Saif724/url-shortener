@@ -6,13 +6,41 @@ import (
 )
 
 type UserHandler struct {
-	jwt JWTService
+	service *UserService
 }
 
-func NewUserHandler(jwt JWTService) *UserHandler {
+func NewUserHandler(service *UserService) *UserHandler {
 	return &UserHandler{
-		jwt: jwt,
+		service: service,
 	}
+}
+
+func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Only POST allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var registerReq LoginRequest
+	err := json.NewDecoder(r.Body).Decode(&registerReq)
+	if err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	userID, err := uh.service.Register(registerReq.Email, registerReq.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"user_id": userID,
+		"message": "User registered successfully",
+	})
 }
 
 func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -28,14 +56,9 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if loginReq.Email != "test@example.com" || loginReq.Password != "password123" {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
-		return
-	}
-
-	token, err := uh.jwt.GenerateToken("user123", loginReq.Email)
+	token, err := uh.service.Login(loginReq.Email, loginReq.Password)
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
 		return
 	}
 
@@ -44,6 +67,6 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(LoginResponse{
 		Success: true,
 		Token:   token,
-		UserID:  "user123",
+		UserID:  "user",
 	})
 }

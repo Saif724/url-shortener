@@ -13,8 +13,43 @@ servers:
 tags:
   - name: URL
     description: URL shortening operations
+  - name: Auth
+    description: Authentication operations
 
 paths:
+  /register:
+    post:
+      summary: Register new user
+      description: Create a new user account
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: newuser@example.com
+                password:
+                  type: string
+                  example: password123
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  user_id:
+                    type: string
+        '400':
+          description: Invalid email or password already exists
   /login:
     post:
       summary: User login
@@ -158,12 +193,16 @@ components:
   securitySchemes:
     bearerAuth:
       type: http
-      schema: bearer
+      scheme: bearer
+      bearerFormat: JWT
       description: JWT token in Authorization header
   schemas:
     ErrorResponse:
       type: object
       properties:
+        success:
+          type: boolean
+          example: false
         error:
           type: string
           description: Error message

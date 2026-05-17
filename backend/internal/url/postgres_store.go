@@ -25,6 +25,10 @@ func NewPostgresStore(connStr string) (*PostgresStore, error) {
 	return &PostgresStore{db: db}, nil
 }
 
+func (ps *PostgresStore) DB() *sql.DB {
+	return ps.db
+}
+
 func (p *PostgresStore) Save(url URL) error {
 	query := `insert into urls (id, original_url, created_at) values ($1,$2, NOW())`
 	_, err := p.db.Exec(query, url.ID, url.URL)
