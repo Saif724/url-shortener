@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -36,6 +37,12 @@ func Auth(secretKey string) func(http.Handler) http.Handler {
 				http.Error(w, "Invalid token", http.StatusUnauthorized)
 				return
 			}
+
+			claims := token.Claims.(jwt.MapClaims)
+			userID := claims["user_id"].(string)
+
+			ctx := context.WithValue(r.Context(), "user_id", userID)
+			r = r.WithContext(ctx)
 
 			next.ServeHTTP(w, r)
 		})

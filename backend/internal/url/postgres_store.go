@@ -30,8 +30,8 @@ func (ps *PostgresStore) DB() *sql.DB {
 }
 
 func (p *PostgresStore) Save(url URL) error {
-	query := `insert into urls (id, original_url, created_at) values ($1,$2, NOW())`
-	_, err := p.db.Exec(query, url.ID, url.URL)
+	query := `insert into urls (id, original_url, user_id) values ($1,$2, $3)`
+	_, err := p.db.Exec(query, url.ID, url.URL, url.UserID)
 	return err
 }
 
@@ -47,6 +47,47 @@ func (p *PostgresStore) Get(id string) (URL, bool) {
 	}
 
 	return url, true
+}
+
+func (p *PostgresStore) GetByURLAndUser(originalURL string, userID string) (URL, bool) {
+	query := `select id,original_url, user_id, created_at from urls where original_url=$1 and user_id=$2`
+	row := p.db.QueryRow(query, originalURL, userID)
+
+	var url URL
+	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
+
+	if err != nil {
+		return URL{}, false
+	}
+	return url, true
+}
+
+func (p *PostgresStore) GetByUserID(userID string) ([]URL, error) {
+	query := `select id, original_url, user_id, created_at from urls where user_id=$1 order by created_at desc`
+	rows, err := p.db.Query(query, userID)
+
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var urls []URL
+	for rows.Next() {
+		var url URL
+		err := rows.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		urls = append(urls, url)
+	}
+
+	return urls, nil
+}
+
+func (p *PostgresStore) Delete(id string) error {
+	query := `delete from urls where id=$1`
+	_, err := p.db.Exec(query, id)
+	return err
 }
 
 func (p *PostgresStore) GetByURL(original string) (URL, bool) {

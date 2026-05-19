@@ -26,6 +26,8 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	userID := r.Context().Value("user_id").(string)
+
 	var body struct {
 		URL string `json:"url"`
 	}
@@ -48,7 +50,7 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}
-	id, err := h.service.Shorten(body.URL)
+	id, err := h.service.Shorten(userID, body.URL)
 
 	if err != nil {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
@@ -68,6 +70,55 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Something went wrong", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *Handler) GetUserURLs(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Only GET allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID := r.Context().Value("user_id").(string)
+	urls, err := h.service.GetUserURLs(userID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"data":    urls,
+	})
+}
+
+func (h *Handler) DeleteURL(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		http.Error(w, "Only DELETE allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	userID := r.Context().Value("user_id").(string)
+
+	id := r.URL.Path[len("/user/urls/"):]
+
+	err := h.service.DeleteURL(userID, id)
+	if err != nil {
+		if err.Error() == "unauthorized" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"success": true,
+		"message": "URL deleted",
+	})
 }
 
 func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {

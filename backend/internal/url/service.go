@@ -1,6 +1,7 @@
 package url
 
 import (
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -25,7 +26,7 @@ func generateID() string {
 	return string(b)
 }
 
-func (s *Service) Shorten(original string) (string, error) {
+func (s *Service) Shorten(userID string, original string) (string, error) {
 
 	existing, ok := s.store.GetByURL(original)
 	if ok {
@@ -35,8 +36,9 @@ func (s *Service) Shorten(original string) (string, error) {
 	id := generateID()
 
 	url := URL{
-		ID:  id,
-		URL: original,
+		ID:     id,
+		URL:    original,
+		UserID: userID,
 	}
 
 	err := s.store.Save(url)
@@ -46,6 +48,23 @@ func (s *Service) Shorten(original string) (string, error) {
 	}
 
 	return id, nil
+}
+
+func (s *Service) GetUserURLs(userID string) ([]URL, error) {
+	return s.store.GetByUserID(userID)
+}
+
+func (s *Service) DeleteURL(userID string, id string) error {
+	url, ok := s.store.Get(id)
+	if !ok {
+		return fmt.Errorf("URL not found")
+	}
+
+	if url.UserID != userID {
+		return fmt.Errorf("unauthorized")
+	}
+
+	return s.store.Delete(id)
 }
 
 func (s *Service) Resolve(id string) (string, bool) {

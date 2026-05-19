@@ -113,6 +113,12 @@ func main() {
 	shortenHandler := authMiddleware(http.HandlerFunc(urlHandler.Shorten))
 	mux.Handle("/shorten", shortenHandler)
 
+	getUserURLsHandler := authMiddleware(http.HandlerFunc(urlHandler.GetUserURLs))
+	mux.Handle("/user/urls", getUserURLsHandler)
+
+	deleteURLHandler := authMiddleware(http.HandlerFunc(urlHandler.DeleteURL))
+	mux.Handle("/user/urls/", deleteURLHandler)
+
 	mux.HandleFunc("/docs", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		w.Write([]byte(serveSwaggerUI()))
@@ -125,8 +131,8 @@ func main() {
 
 	var handler http.Handler = mux
 
-	handler = rateLimiter(handler)
 	handler = corsMiddleware(handler)
+	handler = rateLimiter(handler)
 	handler = middleware.Logger(handler)
 	handler = middleware.RequestID(handler)
 
