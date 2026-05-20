@@ -3,6 +3,7 @@ package user
 import (
 	"encoding/json"
 	"net/http"
+	"urlshortener/backend/internal/api"
 )
 
 type UserHandler struct {
@@ -17,54 +18,49 @@ func NewUserHandler(service *UserService) *UserHandler {
 
 func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Only POST allowed", http.StatusMethodNotAllowed)
+		api.RespondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST allowed")
 		return
 	}
 
 	var registerReq LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&registerReq)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		api.RespondError(w, http.StatusBadRequest, "INVALID_JSON", "Invalid JSON")
 		return
 	}
 
 	userID, err := uh.service.Register(registerReq.Email, registerReq.Password)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		api.RespondError(w, http.StatusBadRequest, "REGISTRATION_ERROR", err.Error())
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
+	api.RespondSuccess(w, http.StatusCreated, map[string]string{
 		"user_id": userID,
-		"message": "User registered successfully",
+		"message": "User registered succussfully",
 	})
 }
 
 func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Only POST allowed", http.StatusMethodNotAllowed)
+		api.RespondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST allowed")
 		return
 	}
 
 	var loginReq LoginRequest
 	err := json.NewDecoder(r.Body).Decode(&loginReq)
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		api.RespondError(w, http.StatusBadRequest, "INVALID_JSON", "Invalid JSON")
 		return
 	}
 
 	token, err := uh.service.Login(loginReq.Email, loginReq.Password)
 	if err != nil {
-		http.Error(w, "Invalid email or password", http.StatusUnauthorized)
+		api.RespondError(w, http.StatusUnauthorized, "LOGIN_FAILED", "Invalid email or password")
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(LoginResponse{
+	api.RespondSuccess(w, http.StatusOK, LoginResponse{
 		Success: true,
 		Token:   token,
 		UserID:  "user",

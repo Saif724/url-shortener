@@ -39,3 +39,13 @@ func (m *MemoryStore) GetByURL(original string) (URL, bool) {
 	}
 	return URL{}, false
 }
+
+func (m *MemoryStore) GetByURLAndUser(originalURL string, userID string) (URL, bool) {
+	return URL{}, false
+}
+func (m *MemoryStore) GetByUserID(userID string) ([]URL, error) {
+	return []URL{}, nil
+}
+func (m *MemoryStore) Delete(id string) error {
+	return nil
+}

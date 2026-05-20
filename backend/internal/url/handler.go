@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"net/url"
 	"time"
+	"urlshortener/backend/internal/api"
 	"urlshortener/backend/internal/cache"
 )
 
@@ -22,11 +23,15 @@ func NewHandler(service *Service, cache *cache.RedisCache) *Handler {
 
 func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
-		http.Error(w, "Only POST allowed", http.StatusMethodNotAllowed)
+		api.RespondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only POST allowed")
 		return
 	}
 
-	userID := r.Context().Value("user_id").(string)
+	userID, ok := r.Context().Value("user_id").(string)
+	if !ok {
+		api.RespondError(w, http.StatusInternalServerError, "CONTEXT_ERROR", "Invalid user_id in context")
+		return
+	}
 
 	var body struct {
 		URL string `json:"url"`
@@ -35,93 +40,39 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&body)
 
 	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		api.RespondError(w, http.StatusBadRequest, "INVALID_JSON", "Invalid JSON")
 		return
 	}
 
 	if body.URL == "" {
-		http.Error(w, "URL required", http.StatusBadRequest)
+		api.RespondError(w, http.StatusBadRequest, "URL_REQUIRED", "URL required")
 		return
 	}
 
 	_, err = url.ParseRequestURI(body.URL)
 
 	if err != nil {
-		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		api.RespondError(w, http.StatusBadRequest, "INVALID_URL", "Invalid URL")
 		return
 	}
 	id, err := h.service.Shorten(userID, body.URL)
 
 	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		api.RespondError(w, http.StatusInternalServerError, "SERVICE_ERROR", "Something went wrong")
 		return
 	}
 
-	w.WriteHeader(http.StatusCreated)
-
-	err = json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"data": map[string]string{
-			"short_url": "http://localhost:8080/r/" + id,
-		},
-	})
-
-	if err != nil {
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
-		return
-	}
-}
-
-func (h *Handler) GetUserURLs(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Only GET allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	userID := r.Context().Value("user_id").(string)
-	urls, err := h.service.GetUserURLs(userID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"data":    urls,
-	})
-}
-
-func (h *Handler) DeleteURL(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodDelete {
-		http.Error(w, "Only DELETE allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	userID := r.Context().Value("user_id").(string)
-
-	id := r.URL.Path[len("/user/urls/"):]
-
-	err := h.service.DeleteURL(userID, id)
-	if err != nil {
-		if err.Error() == "unauthorized" {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
-			return
-		}
-		http.Error(w, err.Error(), http.StatusNotFound)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"success": true,
-		"message": "URL deleted",
+	api.RespondSuccess(w, http.StatusCreated, map[string]string{
+		"short_url": "http://localhost:8080/r/" + id,
 	})
 }
 
 func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		api.RespondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET allowed")
+		return
+	}
+
 	id := r.URL.Path[len("/r/"):]
 
 	cachedURL, err := h.cache.Get(r.Context(), id)
@@ -133,10 +84,60 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 	url, ok := h.service.Resolve(id)
 
 	if !ok {
-		http.NotFound(w, r)
+		api.RespondError(w, http.StatusNotFound, "URL_NOT_FOUND", "Short URL not found")
 		return
 	}
 
 	h.cache.Set(r.Context(), id, url, 24*time.Hour)
 	http.Redirect(w, r, url, http.StatusFound)
+}
+
+func (h *Handler) GetUserURLs(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		api.RespondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only GET allowed")
+		return
+	}
+
+	userID, ok := r.Context().Value("user_id").(string)
+	if !ok {
+		api.RespondError(w, http.StatusInternalServerError, "CONTEXT_ERROR", "Invalid user_id in context")
+		return
+	}
+
+	urls, err := h.service.GetUserURLs(userID)
+	if err != nil {
+		api.RespondError(w, http.StatusInternalServerError, "CONTEXT_ERROR", err.Error())
+		return
+	}
+
+	api.RespondSuccess(w, http.StatusOK, urls)
+}
+
+func (h *Handler) DeleteURL(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		api.RespondError(w, http.StatusMethodNotAllowed, "METHOD_NOT_ALLOWED", "Only DELETE allowed")
+		return
+	}
+
+	userID, ok := r.Context().Value("user_id").(string)
+	if !ok {
+		api.RespondError(w, http.StatusInternalServerError, "CONTEXT_ERROR", "Invalid user_id in context")
+		return
+	}
+
+	id := r.URL.Path[len("/user/urls/"):]
+
+	err := h.service.DeleteURL(userID, id)
+	if err != nil {
+		if err.Error() == "unauthorized" {
+			api.RespondError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized")
+			return
+		}
+		api.RespondError(w, http.StatusNotFound, "URL_NOT_FOUND", err.Error())
+		return
+	}
+
+	api.RespondSuccess(w, http.StatusOK, map[string]string{
+		"message": "URL deleted",
+	})
 }
