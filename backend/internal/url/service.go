@@ -60,11 +60,6 @@ func (s *Service) DeleteURL(userID string, id string) error {
 		return fmt.Errorf("not_found")
 	}
 
-	// DEBUG: Print both values
-	fmt.Printf("DEBUG: Comparing userID='%s' with url.UserID='%s'\n", userID, url.UserID)
-	fmt.Printf("DEBUG: Are they equal? %v\n", userID == url.UserID)
-	fmt.Printf("DEBUG: userID length=%d, url.UserID length=%d\n", len(userID), len(url.UserID))
-
 	if url.UserID != userID {
 		return fmt.Errorf("unauthorized")
 	}

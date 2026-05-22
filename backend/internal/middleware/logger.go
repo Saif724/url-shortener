@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -9,8 +8,6 @@ import (
 
 func Logger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
-		fmt.Println("--- DEBUG: Request Received ---")
 		start := time.Now()
 
 		requestID := r.Context().Value(RequestIDKey)

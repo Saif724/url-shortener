@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"log"
 	"net"
 	"net/http"
 	"sync"
@@ -53,7 +52,6 @@ func RateLimiter(capacity float64, refillRate float64) func(http.Handler) http.H
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			clientIP := getClientIP(r)
-			log.Printf(">>> RATE LIMITER: Checking IP [%s]\n", clientIP)
 
 			mu.Lock()
 			bucket, exists := buckets[clientIP]

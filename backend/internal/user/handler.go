@@ -3,6 +3,7 @@ package user
 import (
 	"encoding/json"
 	"net/http"
+
 	"urlshortener/backend/internal/api"
 )
 
@@ -29,6 +30,16 @@ func (uh *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err := api.ValidateEmail(registerReq.Email); err != nil {
+		api.RespondError(w, http.StatusBadRequest, "INVALID_EMAIL", err.Error())
+		return
+	}
+
+	if err := api.ValidatePassword(registerReq.Password); err != nil {
+		api.RespondError(w, http.StatusBadRequest, "INVALID_PASSWORD", err.Error())
+		return
+	}
+
 	userID, err := uh.service.Register(registerReq.Email, registerReq.Password)
 	if err != nil {
 		api.RespondError(w, http.StatusBadRequest, "REGISTRATION_ERROR", err.Error())
@@ -51,6 +62,16 @@ func (uh *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&loginReq)
 	if err != nil {
 		api.RespondError(w, http.StatusBadRequest, "INVALID_JSON", "Invalid JSON")
+		return
+	}
+
+	if err := api.ValidateEmail(loginReq.Email); err != nil {
+		api.RespondError(w, http.StatusBadRequest, "INVALID_EMAIL", err.Error())
+		return
+	}
+
+	if err := api.ValidatePassword(loginReq.Password); err != nil {
+		api.RespondError(w, http.StatusBadRequest, "INVALID_PASSWORD", err.Error())
 		return
 	}
 

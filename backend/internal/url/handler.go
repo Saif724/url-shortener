@@ -3,7 +3,6 @@ package url
 import (
 	"encoding/json"
 	"net/http"
-	"net/url"
 	"path"
 	"time"
 
@@ -50,17 +49,11 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if body.URL == "" {
-		api.RespondError(w, http.StatusBadRequest, "URL_REQUIRED", "URL required")
+	if err := api.ValidateURL(body.URL); err != nil {
+		api.RespondError(w, http.StatusBadRequest, "INVALID_URL", err.Error())
 		return
 	}
 
-	_, err = url.ParseRequestURI(body.URL)
-
-	if err != nil {
-		api.RespondError(w, http.StatusBadRequest, "INVALID_URL", "Invalid URL")
-		return
-	}
 	id, err := h.service.Shorten(userID, body.URL)
 
 	if err != nil {
