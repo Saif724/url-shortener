@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"path"
 	"time"
+
 	"urlshortener/backend/internal/api"
 	"urlshortener/backend/internal/cache"
 )
@@ -19,6 +21,10 @@ func NewHandler(service *Service, cache *cache.RedisCache) *Handler {
 		service: service,
 		cache:   cache,
 	}
+}
+
+func extractIDFromPath(reqPath string) string {
+	return path.Base(reqPath)
 }
 
 func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
@@ -125,19 +131,27 @@ func (h *Handler) DeleteURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := r.URL.Path[len("/user/urls/"):]
+	id := extractIDFromPath(r.URL.Path)
+
+	if id == "" || id == "user" {
+		api.RespondError(w, http.StatusBadRequest, "INVALID_URL_ID", "Invalid URL ID")
+		return
+	}
 
 	err := h.service.DeleteURL(userID, id)
 	if err != nil {
-		if err.Error() == "unauthorized" {
-			api.RespondError(w, http.StatusUnauthorized, "UNAUTHORIZED", "Unauthorized")
-			return
+		switch err.Error() {
+		case "unauthorized":
+			api.RespondError(w, http.StatusUnauthorized, "UNAUTHORIZED", "You can only delete your own URLs")
+		case "not_found":
+			api.RespondError(w, http.StatusNotFound, "URL_NOT_FOUND", "URL not found")
+		default:
+			api.RespondError(w, http.StatusInternalServerError, "DELETE_ERROR", err.Error())
 		}
-		api.RespondError(w, http.StatusNotFound, "URL_NOT_FOUND", err.Error())
 		return
 	}
 
 	api.RespondSuccess(w, http.StatusOK, map[string]string{
-		"message": "URL deleted",
+		"message": "URL deleted successfully",
 	})
 }

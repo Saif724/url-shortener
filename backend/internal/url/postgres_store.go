@@ -36,11 +36,11 @@ func (p *PostgresStore) Save(url URL) error {
 }
 
 func (p *PostgresStore) Get(id string) (URL, bool) {
-	query := `select id,original_url, created_at from urls where id=$1`
+	query := `select id,original_url, user_id, created_at from urls where id=$1`
 	row := p.db.QueryRow(query, id)
 
 	var url URL
-	err := row.Scan(&url.ID, &url.URL, &url.CreatedAt)
+	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
 
 	if err != nil {
 		return URL{}, false
@@ -91,11 +91,11 @@ func (p *PostgresStore) Delete(id string) error {
 }
 
 func (p *PostgresStore) GetByURL(original string) (URL, bool) {
-	query := `select id,original_url, created_at from urls where original_url=$1`
+	query := `select id,original_url,user_id, created_at from urls where original_url=$1`
 	row := p.db.QueryRow(query, original)
 
 	var url URL
-	err := row.Scan(&url.ID, &url.URL, &url.CreatedAt)
+	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
 
 	if err != nil {
 		return URL{}, false

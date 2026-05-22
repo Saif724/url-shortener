@@ -28,7 +28,7 @@ func generateID() string {
 
 func (s *Service) Shorten(userID string, original string) (string, error) {
 
-	existing, ok := s.store.GetByURL(original)
+	existing, ok := s.store.GetByURLAndUser(original, userID)
 	if ok {
 		return existing.ID, nil
 	}
@@ -57,8 +57,13 @@ func (s *Service) GetUserURLs(userID string) ([]URL, error) {
 func (s *Service) DeleteURL(userID string, id string) error {
 	url, ok := s.store.Get(id)
 	if !ok {
-		return fmt.Errorf("URL not found")
+		return fmt.Errorf("not_found")
 	}
+
+	// DEBUG: Print both values
+	fmt.Printf("DEBUG: Comparing userID='%s' with url.UserID='%s'\n", userID, url.UserID)
+	fmt.Printf("DEBUG: Are they equal? %v\n", userID == url.UserID)
+	fmt.Printf("DEBUG: userID length=%d, url.UserID length=%d\n", len(userID), len(url.UserID))
 
 	if url.UserID != userID {
 		return fmt.Errorf("unauthorized")
