@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+
 	"urlshortener/backend/internal/cache"
 	"urlshortener/backend/internal/middleware"
 	"urlshortener/backend/internal/url"
@@ -66,11 +67,26 @@ func main() {
 
 	godotenv.Load()
 
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"), os.Getenv("DB_SSLMODE"))
+	jwtSecret := os.Getenv("JWT_SECRET")
+
+	if jwtSecret == "" {
+		panic("JWT_SECRET environment variable is required")
+	}
+
+	dbHost := os.Getenv("DB_HOST")
+	if dbHost == "" {
+		panic("DB_HOST environment variable is required")
+	}
+
+	dbPassword := os.Getenv("DB_PASSWORD")
+	if dbPassword == "" {
+		panic("DB_PASSWORD environment variable is required")
+	}
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, os.Getenv("DB_PORT"), os.Getenv("DB_USER"), dbPassword, os.Getenv("DB_NAME"), os.Getenv("DB_SSLMODE"))
 
 	store, err := url.NewPostgresStore(connStr)
 	if err != nil {
-		panic(err)
+		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
 	redisCache := cache.NewRedisCache(
@@ -78,11 +94,6 @@ func main() {
 		os.Getenv("REDIS_PORT"),
 	)
 	defer redisCache.Close()
-
-	jwtSecret := os.Getenv("JWT_SECRET")
-	if jwtSecret == "" {
-		jwtSecret = "your-secret-key"
-	}
 
 	jwtService := user.NewJWTService(jwtSecret)
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/mail"
 	"net/url"
+	"strings"
 )
 
 func ValidateEmail(email string) error {
@@ -58,6 +59,10 @@ func ValidateURL(urlString string) error {
 
 	if len(urlString) > 2048 {
 		return fmt.Errorf("URL is too long (max 2048 chars)")
+	}
+
+	if !strings.HasPrefix(urlString, "http://") && !strings.HasPrefix(urlString, "https://") {
+		return fmt.Errorf("URL must start with http:// or https://")
 	}
 
 	_, err := url.ParseRequestURI(urlString)

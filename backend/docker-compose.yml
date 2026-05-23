@@ -43,3 +43,4 @@ services:
       - DB_SSLMODE=disable
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
+      - JWT_SECRET=${JWT_SECRET}

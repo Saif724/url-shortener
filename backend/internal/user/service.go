@@ -27,7 +27,7 @@ func (us *UserService) Register(email string, password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to hash password")
 	}
 
 	user := User{
@@ -52,12 +52,12 @@ func (us *UserService) Login(email string, password string) (string, error) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("invalid credentials")
 	}
 
 	token, err := us.jwt.GenerateToken(user.ID, user.Email)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("failed to generate token")
 	}
 	return token, nil
 }

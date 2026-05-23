@@ -72,7 +72,12 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := r.URL.Path[len("/r/"):]
+	id := extractIDFromPath(r.URL.Path)
+
+	if id == "" || id == "r" {
+		api.RespondError(w, http.StatusBadRequest, "INVALID_URL_ID", "Invalid URL ID")
+		return
+	}
 
 	cachedURL, err := h.cache.Get(r.Context(), id)
 	if err == nil && cachedURL != "" {
@@ -87,7 +92,7 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.cache.Set(r.Context(), id, url, 24*time.Hour)
+	_ = h.cache.Set(r.Context(), id, url, 24*time.Hour)
 	http.Redirect(w, r, url, http.StatusFound)
 }
 
@@ -126,7 +131,7 @@ func (h *Handler) DeleteURL(w http.ResponseWriter, r *http.Request) {
 
 	id := extractIDFromPath(r.URL.Path)
 
-	if id == "" || id == "user" {
+	if id == "" || id == "user" || id == "urls" {
 		api.RespondError(w, http.StatusBadRequest, "INVALID_URL_ID", "Invalid URL ID")
 		return
 	}
