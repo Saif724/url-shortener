@@ -1,39 +1,47 @@
 package url
 
 import (
+	"fmt"
 	"sync"
 )
 
 type MemoryStore struct {
-	data map[string]URL
+	urls map[string]URL
 	mu   sync.Mutex
 }
 
 func NewMemoryStore() *MemoryStore {
 	return &MemoryStore{
-		data: make(map[string]URL),
+		urls: make(map[string]URL),
 	}
 }
 
 func (m *MemoryStore) Save(url URL) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.data[url.ID] = url
+
+	if _, exists := m.urls[url.ID]; exists {
+		return fmt.Errorf("URL already exists")
+	}
+
+	m.urls[url.ID] = url
 	return nil
 }
 
 func (m *MemoryStore) Get(id string) (URL, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	url, ok := m.data[id]
-	return url, ok
+
+	url, exists := m.urls[id]
+	return url, exists
 }
 
-func (m *MemoryStore) GetByURL(original string) (URL, bool) {
+func (m *MemoryStore) GetByURL(originalURL string) (URL, bool) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	for _, url := range m.data {
-		if url.URL == original {
+
+	for _, url := range m.urls {
+		if url.URL == originalURL {
 			return url, true
 		}
 	}
@@ -41,11 +49,38 @@ func (m *MemoryStore) GetByURL(original string) (URL, bool) {
 }
 
 func (m *MemoryStore) GetByURLAndUser(originalURL string, userID string) (URL, bool) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	for _, url := range m.urls {
+		if url.URL == originalURL && url.UserID == userID {
+			return url, true
+		}
+	}
 	return URL{}, false
 }
+
 func (m *MemoryStore) GetByUserID(userID string) ([]URL, error) {
-	return []URL{}, nil
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	var urls []URL
+	for _, url := range m.urls {
+		if url.UserID == userID {
+			urls = append(urls, url)
+		}
+	}
+	return urls, nil
 }
+
 func (m *MemoryStore) Delete(id string) error {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if _, exists := m.urls[id]; !exists {
+		return fmt.Errorf("URL not found")
+	}
+
+	delete(m.urls, id)
 	return nil
 }
