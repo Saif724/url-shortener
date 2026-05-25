@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	_ "github.com/lib/pq"
+	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
 type PostgresStore struct {
@@ -14,7 +14,7 @@ type PostgresStore struct {
 }
 
 func NewPostgresStore(connStr string) (*PostgresStore, error) {
-	db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("pgx", connStr)
 	if err != nil {
 		return nil, err
 	}

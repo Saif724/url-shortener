@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	"github.com/lib/pq"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 type PostgresUserStore struct {
@@ -22,7 +22,7 @@ func (ps *PostgresUserStore) SaveUser(user User) error {
 	_, err := ps.db.Exec(query, user.ID, user.Email, user.Password)
 
 	if err != nil {
-		if pgErr, ok := err.(*pq.Error); ok {
+		if pgErr, ok := err.(*pgconn.PgError); ok {
 			if pgErr.Code == "23505" {
 				return fmt.Errorf("email already exists")
 			}

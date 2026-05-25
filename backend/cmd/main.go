@@ -85,15 +85,9 @@ func main() {
 		panic("JWT_SECRET environment variable is required")
 	}
 
-	dbHost := mustEnv("DB_HOST")
-	dbPort := mustEnv("DB_PORT")
-	dbUser := mustEnv("DB_USER")
-	dbPassword := mustEnv("DB_PASSWORD")
-	dbName := mustEnv("DB_NAME")
-	dbSSL := mustEnv("DB_SSLMODE")
 	redisHost := mustEnv("REDIS_HOST")
 	redisPort := mustEnv("REDIS_PORT")
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, dbSSL)
+	connStr := mustEnv("DATABASE_URL")
 
 	store, err := url.NewPostgresStore(connStr)
 	if err != nil {
