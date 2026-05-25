@@ -8,13 +8,15 @@ import (
 	"net/http/httptest"
 	"testing"
 	"urlshortener/backend/internal/cache"
+	"urlshortener/backend/internal/config"
 )
 
 func TestShortenFlow(t *testing.T) {
 	store := NewMemoryStore()
 	service := NewService(store)
 	redisCache := &cache.RedisCache{} // Mock cache
-	handler := NewHandler(service, redisCache)
+	cfg := config.Load()
+	handler := NewHandler(service, redisCache, &cfg)
 
 	// Test 1: Shorten URL
 	body := `{"url": "https://google.com"}`
@@ -41,7 +43,7 @@ func TestShortenFlow(t *testing.T) {
 
 	data := response["data"].(map[string]interface{})
 	shortURL := data["short_url"].(string)
-	shortID := shortURL[len("http://localhost:8080/r/"):]
+	shortID := shortURL[len(cfg.BaseURL):]
 
 	// Test 2: Get user's URLs
 	req2 := httptest.NewRequest(http.MethodGet, "/user/urls", nil)
@@ -97,8 +99,9 @@ func TestShortenFlow(t *testing.T) {
 func TestShortenUnauthorized(t *testing.T) {
 	store := NewMemoryStore()
 	service := NewService(store)
-	redisCache := &cache.RedisCache{}
-	handler := NewHandler(service, redisCache)
+	redisCache := &cache.RedisCache{} // Mock cache
+	cfg := config.Load()
+	handler := NewHandler(service, redisCache, &cfg)
 
 	body := `{"url": "https://google.com"}`
 	req := httptest.NewRequest(http.MethodPost, "/shorten", bytes.NewBufferString(body))
@@ -115,8 +118,9 @@ func TestShortenUnauthorized(t *testing.T) {
 func TestInvalidURL(t *testing.T) {
 	store := NewMemoryStore()
 	service := NewService(store)
-	redisCache := &cache.RedisCache{}
-	handler := NewHandler(service, redisCache)
+	redisCache := &cache.RedisCache{} // Mock cache
+	cfg := config.Load()
+	handler := NewHandler(service, redisCache, &cfg)
 
 	body := `{"url": "google.com"}`
 	req := httptest.NewRequest(http.MethodPost, "/shorten", bytes.NewBufferString(body))

@@ -3,27 +3,30 @@ package url
 import (
 	"encoding/json"
 	"net/http"
-	"path"
+	"strings"
 	"time"
 
 	"urlshortener/backend/internal/api"
 	"urlshortener/backend/internal/cache"
+	"urlshortener/backend/internal/config"
 )
 
 type Handler struct {
 	service *Service
 	cache   *cache.RedisCache
+	cfg     *config.Config
 }
 
-func NewHandler(service *Service, cache *cache.RedisCache) *Handler {
+func NewHandler(service *Service, cache *cache.RedisCache, cfg *config.Config) *Handler {
 	return &Handler{
 		service: service,
 		cache:   cache,
+		cfg:     cfg,
 	}
 }
 
 func extractIDFromPath(reqPath string) string {
-	return path.Base(reqPath)
+	return strings.TrimPrefix(reqPath, "/r/")
 }
 
 func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
@@ -62,7 +65,7 @@ func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
 	}
 
 	api.RespondSuccess(w, http.StatusCreated, map[string]string{
-		"short_url": "http://localhost:8080/r/" + id,
+		"short_url": h.cfg.BaseURL + "/r/" + id,
 	})
 }
 

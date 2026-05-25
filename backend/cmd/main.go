@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"urlshortener/backend/internal/cache"
+	"urlshortener/backend/internal/config"
 	"urlshortener/backend/internal/middleware"
 	"urlshortener/backend/internal/url"
 	"urlshortener/backend/internal/user"
@@ -67,46 +68,30 @@ func serveSwaggerUI() string {
 </html>`
 }
 
-func mustEnv(key string) string {
-	val := os.Getenv(key)
-	if val == "" {
-		panic(key + " is required")
-	}
-	return val
-}
-
 func main() {
 
 	_ = godotenv.Load()
+	cfg := config.Load()
 
-	jwtSecret := os.Getenv("JWT_SECRET")
-
-	if jwtSecret == "" {
-		panic("JWT_SECRET environment variable is required")
-	}
-
-	redisURL := mustEnv("REDIS_URL")
-	connStr := mustEnv("DATABASE_URL")
-
-	store, err := url.NewPostgresStore(connStr)
+	store, err := url.NewPostgresStore(cfg.DBURL)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
-	redisCache := cache.NewRedisCache(redisURL)
+	redisCache := cache.NewRedisCache(cfg.RedisURL)
 	defer redisCache.Close()
 
-	jwtService := user.NewJWTService(jwtSecret)
+	jwtService := user.NewJWTService(cfg.JWTSecret)
 
 	urlService := url.NewService(store)
 
 	userStore := user.NewPostgresUserStore(store.DB())
 	userService := user.NewUserService(userStore, jwtService)
 
-	urlHandler := url.NewHandler(urlService, redisCache)
+	urlHandler := url.NewHandler(urlService, redisCache, &cfg)
 	userHandler := user.NewUserHandler(userService)
 
-	authMiddleware := middleware.Auth(jwtSecret)
+	authMiddleware := middleware.Auth(cfg.JWTSecret)
 
 	rateLimiter := middleware.RateLimiter(10, 1)
 
@@ -146,13 +131,8 @@ func main() {
 	handler = middleware.Logger(handler)
 	handler = middleware.RequestID(handler)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
 	server := &http.Server{
-		Addr:         ":" + port,
+		Addr:         ":" + cfg.Port,
 		Handler:      handler,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 15 * time.Second,
@@ -160,7 +140,7 @@ func main() {
 	}
 
 	go func() {
-		fmt.Println("Server running on :" + port)
+		fmt.Println("Server running on :" + cfg.Port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			panic(err)
 		}
