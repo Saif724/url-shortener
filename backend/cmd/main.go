@@ -85,8 +85,7 @@ func main() {
 		panic("JWT_SECRET environment variable is required")
 	}
 
-	redisHost := mustEnv("REDIS_HOST")
-	redisPort := mustEnv("REDIS_PORT")
+	redisURL := mustEnv("REDIS_URL")
 	connStr := mustEnv("DATABASE_URL")
 
 	store, err := url.NewPostgresStore(connStr)
@@ -94,10 +93,7 @@ func main() {
 		panic(fmt.Sprintf("Failed to connect to database: %v", err))
 	}
 
-	redisCache := cache.NewRedisCache(
-		redisHost,
-		redisPort,
-	)
+	redisCache := cache.NewRedisCache(redisURL)
 	defer redisCache.Close()
 
 	jwtService := user.NewJWTService(jwtSecret)

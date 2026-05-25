@@ -2,6 +2,7 @@ package cache
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -11,15 +12,17 @@ type RedisCache struct {
 	client *redis.Client
 }
 
-func NewRedisCache(host string, port string) *RedisCache {
-	client := redis.NewClient(&redis.Options{
-		Addr: host + ":" + port,
-	})
+func NewRedisCache(redisURL string) *RedisCache {
+	opt, err := redis.ParseURL(redisURL)
+	if err != nil {
+		log.Fatal("Invalid Redis URL:", err)
+	}
+	client := redis.NewClient(opt)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := client.Ping(ctx).Result()
+	_, err = client.Ping(ctx).Result()
 	if err != nil {
 		panic("Redis connection failed: " + err.Error())
 	}
