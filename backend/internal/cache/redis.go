@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"log"
+	"crypto/tls"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -15,8 +15,13 @@ type RedisCache struct {
 func NewRedisCache(redisURL string) *RedisCache {
 	opt, err := redis.ParseURL(redisURL)
 	if err != nil {
-		log.Fatal("Invalid Redis URL:", err)
+		panic(err)
 	}
+
+	opt.TLSConfig = &tls.Config{
+		MinVersion: tls.VersionTLS12,
+	}
+
 	client := redis.NewClient(opt)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
