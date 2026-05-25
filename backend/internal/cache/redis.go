@@ -16,6 +16,14 @@ func NewRedisCache(host string, port string) *RedisCache {
 		Addr: host + ":" + port,
 	})
 
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := client.Ping(ctx).Result()
+	if err != nil {
+		panic("Redis connection failed: " + err.Error())
+	}
+
 	return &RedisCache{client: client}
 }
 

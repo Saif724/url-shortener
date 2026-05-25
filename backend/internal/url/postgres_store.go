@@ -1,7 +1,10 @@
 package url
 
 import (
+	"context"
 	"database/sql"
+	"fmt"
+	"time"
 
 	_ "github.com/lib/pq"
 )
@@ -12,12 +15,18 @@ type PostgresStore struct {
 
 func NewPostgresStore(connStr string) (*PostgresStore, error) {
 	db, err := sql.Open("postgres", connStr)
-
 	if err != nil {
 		return nil, err
 	}
 
-	err = db.Ping()
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxLifetime(5 * time.Minute)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err = db.PingContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -43,6 +52,11 @@ func (p *PostgresStore) Get(id string) (URL, bool) {
 	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return URL{}, false
+		}
+
+		fmt.Println("DB ERROR:", err)
 		return URL{}, false
 	}
 
@@ -57,6 +71,11 @@ func (p *PostgresStore) GetByURLAndUser(originalURL string, userID string) (URL,
 	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return URL{}, false
+		}
+
+		fmt.Println("DB ERROR:", err)
 		return URL{}, false
 	}
 	return url, true
@@ -98,6 +117,11 @@ func (p *PostgresStore) GetByURL(original string) (URL, bool) {
 	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
 
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return URL{}, false
+		}
+
+		fmt.Println("DB ERROR:", err)
 		return URL{}, false
 	}
 	return url, true

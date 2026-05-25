@@ -3,6 +3,8 @@ package user
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/lib/pq"
 )
 
 type PostgresUserStore struct {
@@ -20,8 +22,10 @@ func (ps *PostgresUserStore) SaveUser(user User) error {
 	_, err := ps.db.Exec(query, user.ID, user.Email, user.Password)
 
 	if err != nil {
-		if err.Error() == "pq: duplicate key value violates constraint \"users_email_key\"" {
-			return fmt.Errorf("email already exists")
+		if pgErr, ok := err.(*pq.Error); ok {
+			if pgErr.Code == "23505" {
+				return fmt.Errorf("email already exists")
+			}
 		}
 		return err
 	}

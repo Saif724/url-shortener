@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"urlshortener/backend/internal/cache"
 	"urlshortener/backend/internal/middleware"
@@ -44,7 +48,7 @@ func serveSwaggerUI() string {
 	<script>
 		window.onload = function() {
 			const ui = SwaggerUIBundle({
-				url: "http://localhost:8080/openapi.yaml",
+				url: window.location.origin + "/openapi.yaml",
 				dom_id: '#swagger-ui',
 				deepLinking: true,
 				presets: [
@@ -63,9 +67,17 @@ func serveSwaggerUI() string {
 </html>`
 }
 
+func mustEnv(key string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		panic(key + " is required")
+	}
+	return val
+}
+
 func main() {
 
-	godotenv.Load()
+	_ = godotenv.Load()
 
 	jwtSecret := os.Getenv("JWT_SECRET")
 
@@ -73,16 +85,15 @@ func main() {
 		panic("JWT_SECRET environment variable is required")
 	}
 
-	dbHost := os.Getenv("DB_HOST")
-	if dbHost == "" {
-		panic("DB_HOST environment variable is required")
-	}
-
-	dbPassword := os.Getenv("DB_PASSWORD")
-	if dbPassword == "" {
-		panic("DB_PASSWORD environment variable is required")
-	}
-	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, os.Getenv("DB_PORT"), os.Getenv("DB_USER"), dbPassword, os.Getenv("DB_NAME"), os.Getenv("DB_SSLMODE"))
+	dbHost := mustEnv("DB_HOST")
+	dbPort := mustEnv("DB_PORT")
+	dbUser := mustEnv("DB_USER")
+	dbPassword := mustEnv("DB_PASSWORD")
+	dbName := mustEnv("DB_NAME")
+	dbSSL := mustEnv("DB_SSLMODE")
+	redisHost := mustEnv("REDIS_HOST")
+	redisPort := mustEnv("REDIS_PORT")
+	connStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=%s", dbHost, dbPort, dbUser, dbPassword, dbName, dbSSL)
 
 	store, err := url.NewPostgresStore(connStr)
 	if err != nil {
@@ -90,8 +101,8 @@ func main() {
 	}
 
 	redisCache := cache.NewRedisCache(
-		os.Getenv("REDIS_HOST"),
-		os.Getenv("REDIS_PORT"),
+		redisHost,
+		redisPort,
 	)
 	defer redisCache.Close()
 
@@ -110,8 +121,6 @@ func main() {
 	rateLimiter := middleware.RateLimiter(10, 1)
 
 	corsMiddleware := middleware.CORS([]string{
-		"http://localhost:3000",
-		"http://localhost:8080",
 		"*",
 	})
 
@@ -147,7 +156,36 @@ func main() {
 	handler = middleware.Logger(handler)
 	handler = middleware.RequestID(handler)
 
-	fmt.Println("Server running on :8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
-	http.ListenAndServe(":8080", handler)
+	server := &http.Server{
+		Addr:         ":" + port,
+		Handler:      handler,
+		ReadTimeout:  10 * time.Second,
+		WriteTimeout: 15 * time.Second,
+		IdleTimeout:  60 * time.Second,
+	}
+
+	go func() {
+		fmt.Println("Server running on :" + port)
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			panic(err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	fmt.Println("Shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		fmt.Println("Server shutdown error:", err)
+	}
 }
