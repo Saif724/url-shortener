@@ -1,6 +1,24 @@
+# Environment variables
+.env
+
+# Binaries
 bin/
 *.exe
 *.out
-.env
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+
+# Backend
+backend/vendor/
+
+# Logs
+*.log
+
+# OS files
 .DS_Store
 
+# IDE
+.vscode/
+.idea/
