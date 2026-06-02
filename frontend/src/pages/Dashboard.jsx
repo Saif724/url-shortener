@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {useNavigate} from "react-router-dom";
 import {FaCopy, FaSignOutAlt} from "react-icons/fa";
 import API_BASE from "../api/api";
@@ -14,7 +14,7 @@ export default function Dashboard() {
   const getToken = () => localStorage.getItem("token");
 
 
-  const fetchUrls = async () => {
+  const fetchUrls = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch(`${API_BASE}/user/urls`, {
@@ -25,7 +25,6 @@ export default function Dashboard() {
 
       const data = await res.json();
 
-      console.log("GET URLS RESPONSE:", data);
       if (Array.isArray(data.data)){
         setUrls(data.data);
       } else if (Array.isArray(data)){
@@ -39,7 +38,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const shorten = async () => {
     if (!url) {
@@ -83,28 +82,52 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchUrls();
-  }, []);
+  }, [fetchUrls]);
+
+  const deleteUrl = async (id) => {
+    try {
+      const res = await fetch(`${API_BASE}/user/urls/${id}`,{
+        method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${getToken()}`,
+          },
+        });
+
+      const data = await res.json();
+
+      
+      if (res.ok) {
+        toast.success("URL deleted");
+        await fetchUrls();
+      } else {
+        toast.error(data.message || "Delete failed");
+      }
+    }catch (err) {
+      console.log(err);
+      toast.error("Server error");
+    }
+  };
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 px-3 sm:px-6 py-4 sm:py-6">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-white p-4 sm:p-5 rounded-xl shadow-sm">
           <h1 className="text-3xl font-bold">
             URL Dashboard
           </h1>
 
           <button
             onClick={logout}
-            className="flex items-center gap-2 bg-red-500 text-white px-4 py-4 rounded"
+            className="flex items-center justify-center gap-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
           >
             <FaSignOutAlt />
             Logout
           </button>
         </div>
 
-        <div className="bg-white p-4 rounded shadow mb-6 flex gap-2">
+        <div className="bg-white p-3 sm:p-4 rounded-xl shadow flex flex-col sm:flex-row gap-3">
           <input 
-            className="border p-3 flex-1 rounded"
+            className="border rounded-lg p-3 flex-1 outline-none focus:ring-2 focus:ring-blue-400 w-full"
             placeholder="https://example.com"
             value={url}
             onChange={(e) => setUrl(e.target.value)}
@@ -112,11 +135,12 @@ export default function Dashboard() {
 
           <button
             onClick={shorten}
-            className="bg-blue-500 text-white px-5 rounded"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-lg transition w-full sm:w-auto"
           >
             Shorten
           </button>
         </div>
+
 
         {loading ?(
           <p>Loading</p>
@@ -125,40 +149,17 @@ export default function Dashboard() {
             No URLs created yet
           </div>
         ) : (
-          <div>
+          <div className="space-y-3">
             {Array.isArray(urls) &&
               urls.map((u) => {
                 const shortUrl = `${API_BASE}/r/${u.id}`;
-                
-                const deleteUrl = async (id) => {
-                  try {
-                    const res = await fetch(`${API_BASE}/user/urls/${id}`,{
-                      method: "DELETE",
-                      headers: {
-                        Authorization: `Bearer ${getToken()}`,
-                      },
-                    });
-
-                    const data = await res.json();
-
-                    if (res.ok) {
-                      toast.success("URL deleted");
-                      await fetchUrls();
-                    } else {
-                      toast.error(data.message || "Delete failed");
-                    }
-                  }catch (err) {
-                    console.log(err);
-                    toast.error("Server error");
-                  }
-                };
 
                 return (
                   <div
                     key={u.id}
-                    className="bg-white p-4 rounded shadow flex justify-between items-center"
+                    className="bg-white p-4 rounded-xl shadow-sm hover:shadow-md transition flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3"
                   >
-                    <div className="flex flex-col max-w-[75%]">
+                    <div className="flex flex-col max-w-full sm:max-w-[75%]">
                       <span className="text-sm text-gray-500">
                         Original URL
                       </span>
@@ -166,7 +167,7 @@ export default function Dashboard() {
                       <a 
                         href={u.url}
                         target="_blank"
-                        className="truncate text-black"
+                        className="break-words text-gray-800 font-medium hover:text-blue-600"
                       >
                         {u.url}
                       </a>
@@ -186,13 +187,13 @@ export default function Dashboard() {
 
                     <button
                       onClick={() => copyLink(shortUrl)}
-                      className="bg-gray-200 p-3 rounded hover:bg-gray-300"
+                      className="bg-gray-100 p-3 rounded-lg hover:bg-gray-200 transition self-start sm:self-auto"
                     >
                       <FaCopy />
                     </button>
                     <button
                       onClick={() => deleteUrl(u.id)}
-                      className="bg-red-200 p-3 rounded hover:bg-red-300"
+                      className="bg-red-100 text-red-600 p-3 rounded-lg hover:bg-red-200 transition"
                     >
                       Delete
                     </button>
