@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API_BASE from "../api/api";
+import toast from "react-hot-toast";
 
 export default function Register() {
     const [email, setEmail] = useState("");
@@ -19,10 +20,10 @@ export default function Register() {
         const data = await res.json();
 
         if (res.ok) {
-            alert("Account created");
+            toast.success("Account created");
             navigate("/");
         } else {
-            alert(data.message || "Register failed");
+            toast.error(data.message || "Register failed");
         }
     };
 

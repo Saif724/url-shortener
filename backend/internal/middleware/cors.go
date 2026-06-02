@@ -19,13 +19,13 @@ func CORS(allowedOrigins []string) func(http.Handler) http.Handler {
 
 			if allowed {
 				w.Header().Set("Access-Control-Allow-Origin", origin)
-				w.Header().Set("Access-Control-Allow-Methoda", "GET, POST, PUT, DELETE")
+				w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 				w.Header().Set("Access-Control-Allow-Headers", "Content-type, Authorization")
 				w.Header().Set("Access-Control-Max-Age", "3600")
 			}
 
 			if r.Method == http.MethodOptions {
-				w.WriteHeader(http.StatusOK)
+				w.WriteHeader(http.StatusNoContent)
 				return
 			}
 			next.ServeHTTP(w, r)

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {useNavigate} from "react-router-dom";
 import API_BASE from "../api/api";
+import toast from "react-hot-toast";
  
 export default function Login() {
     const [email, setEmail] = useState("");
@@ -22,7 +23,7 @@ export default function Login() {
             localStorage.setItem("token", data.data.token);
             navigate("/dashboard");
         } else {
-            alert(data.message || "Login failed");
+            toast.error(data.message || "Login failed");
         }
     };
 
