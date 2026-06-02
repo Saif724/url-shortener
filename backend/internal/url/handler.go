@@ -3,6 +3,7 @@ package url
 import (
 	"encoding/json"
 	"net/http"
+	"path"
 	"strings"
 	"time"
 
@@ -23,10 +24,6 @@ func NewHandler(service *Service, cache *cache.RedisCache, cfg *config.Config) *
 		cache:   cache,
 		cfg:     cfg,
 	}
-}
-
-func extractIDFromPath(reqPath string) string {
-	return strings.TrimPrefix(reqPath, "/r/")
 }
 
 func (h *Handler) Shorten(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +72,7 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := extractIDFromPath(r.URL.Path)
+	id := strings.TrimPrefix(r.URL.Path, "/r/")
 
 	if id == "" || id == "r" {
 		api.RespondError(w, http.StatusBadRequest, "INVALID_URL_ID", "Invalid URL ID")
@@ -132,7 +129,7 @@ func (h *Handler) DeleteURL(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id := extractIDFromPath(r.URL.Path)
+	id := path.Base(r.URL.Path)
 
 	if id == "" || id == "user" || id == "urls" {
 		api.RespondError(w, http.StatusBadRequest, "INVALID_URL_ID", "Invalid URL ID")
