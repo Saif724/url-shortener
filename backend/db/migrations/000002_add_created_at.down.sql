@@ -1,1 +1,1 @@
-ALTER TABLE urls DROP COLUMN created_at;
+ALTER TABLE urls DROP COLUMN IF EXISTS created_at;
