@@ -45,11 +45,11 @@ func (p *PostgresStore) Save(url URL) error {
 }
 
 func (p *PostgresStore) Get(id string) (URL, bool) {
-	query := `select id,original_url, user_id, created_at from urls where id=$1`
+	query := `select id,original_url, user_id, created_at, clicks from urls where id=$1`
 	row := p.db.QueryRow(query, id)
 
 	var url URL
-	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
+	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt, &url.Clicks)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -64,11 +64,11 @@ func (p *PostgresStore) Get(id string) (URL, bool) {
 }
 
 func (p *PostgresStore) GetByURLAndUser(originalURL string, userID string) (URL, bool) {
-	query := `select id,original_url, user_id, created_at from urls where original_url=$1 and user_id=$2`
+	query := `select id,original_url, user_id, created_at, clicks from urls where original_url=$1 and user_id=$2`
 	row := p.db.QueryRow(query, originalURL, userID)
 
 	var url URL
-	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
+	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt, &url.Clicks)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -82,7 +82,7 @@ func (p *PostgresStore) GetByURLAndUser(originalURL string, userID string) (URL,
 }
 
 func (p *PostgresStore) GetByUserID(userID string) ([]URL, error) {
-	query := `select id, original_url, user_id, created_at from urls where user_id=$1 order by created_at desc`
+	query := `select id, original_url, user_id, created_at, clicks from urls where user_id=$1 order by created_at desc`
 	rows, err := p.db.Query(query, userID)
 
 	if err != nil {
@@ -93,14 +93,14 @@ func (p *PostgresStore) GetByUserID(userID string) ([]URL, error) {
 	var urls []URL
 	for rows.Next() {
 		var url URL
-		err := rows.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
+		err := rows.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt, &url.Clicks)
 		if err != nil {
 			return nil, err
 		}
 		urls = append(urls, url)
 	}
 
-	return urls, nil
+	return urls, rows.Err()
 }
 
 func (p *PostgresStore) Delete(id string) error {
@@ -110,11 +110,11 @@ func (p *PostgresStore) Delete(id string) error {
 }
 
 func (p *PostgresStore) GetByURL(original string) (URL, bool) {
-	query := `select id,original_url,user_id, created_at from urls where original_url=$1`
+	query := `select id,original_url,user_id, created_at, clicks from urls where original_url=$1`
 	row := p.db.QueryRow(query, original)
 
 	var url URL
-	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt)
+	err := row.Scan(&url.ID, &url.URL, &url.UserID, &url.CreatedAt, &url.Clicks)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -125,4 +125,10 @@ func (p *PostgresStore) GetByURL(original string) (URL, bool) {
 		return URL{}, false
 	}
 	return url, true
+}
+
+func (p *PostgresStore) IncrementClicks(id string) error {
+	query := `update urls set clicks=clicks +1 where id = $1`
+	_,err := p.db.Exec(query, id)
+	return err
 }

@@ -7,4 +7,5 @@ type URL struct {
 	URL       string    `json:"url"`
 	UserID    string    `json:"user_id"`
 	CreatedAt time.Time `json:"created_at"`
+	Clicks string `json:"clicks"`
 }

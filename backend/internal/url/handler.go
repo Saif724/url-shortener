@@ -93,6 +93,8 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_ = h.cache.Set(r.Context(), id, url, 24*time.Hour)
+
+	_ = h.service.IncrementClicks(id)
 	http.Redirect(w, r, url, http.StatusFound)
 }
 

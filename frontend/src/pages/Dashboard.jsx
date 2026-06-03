@@ -11,7 +11,7 @@ export default function Dashboard() {
 
   const navigate = useNavigate();
 
-  const getToken = () => localStorage.getItem("token");
+  const getToken = useCallback(() => localStorage.getItem("token"),[]);
 
 
   const fetchUrls = useCallback(async () => {
@@ -38,7 +38,7 @@ export default function Dashboard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [getToken]);
 
   const shorten = async () => {
     if (!url) {
@@ -112,9 +112,15 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 px-3 sm:px-6 py-4 sm:py-6">
       <div className="max-w-5xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 bg-white p-4 sm:p-5 rounded-xl shadow-sm">
-          <h1 className="text-3xl font-bold">
-            URL Dashboard
-          </h1>
+           <div>
+            <h1 className="text-3xl font-bold text-gray-800">
+              URL Dashboard
+            </h1>
+
+            <p className="text-sm text-gray-500">
+              Manage and track your shortened links
+            </p>
+           </div>
 
           <button
             onClick={logout}
@@ -123,6 +129,28 @@ export default function Dashboard() {
             <FaSignOutAlt />
             Logout
           </button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white rounded-xl shadow-sm p-5">
+            <p className="text-gray-500 text-sm">
+              Total URLs
+            </p>
+
+            <h2 className="text-3xl font-bold mt-2">
+              {urls.length}
+            </h2>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm p-5">
+            <p className="text-gray-500 text-sm">
+              Total Clicks
+            </p>
+
+            <h2 className="text-3xl font-bold mt-2">
+              {urls.reduce((sum, u) => sum + (u.clicks || 0), 0)}
+            </h2>
+          </div>
         </div>
 
         <div className="bg-white p-3 sm:p-4 rounded-xl shadow flex flex-col sm:flex-row gap-3">
@@ -143,10 +171,31 @@ export default function Dashboard() {
 
 
         {loading ?(
-          <p>Loading</p>
+          <div className="space-y-3">
+            {[1,2,3].map((item) => (
+              <div
+                key={item}
+                className="bg-white p-4 rounded-xl shadow-sm"
+              >
+                <div className="animate-pulse">
+                  <div className="h-3 bg-gray-200 rounded w-20 mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-full mb-4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-24 mb-3"></div>
+                  <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                </div>
+                
+              </div>
+            ))}
+          </div>
         ) : !Array.isArray(urls) ||  urls.length === 0 ? (
-          <div className="bg-white p-6 rounded shadow text-center text-gray-500">
-            No URLs created yet
+          <div className="bg-white p-10 rounded-xl shadow text-center">
+            <h2 className="text-lg font-semibold text-gray-700">
+              No URLs yet
+            </h2>
+
+            <p className="text-gray-500 mt-2">
+              Create your first link above 🚀
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -185,18 +234,21 @@ export default function Dashboard() {
                       </a>
                     </div>
 
-                    <button
-                      onClick={() => copyLink(shortUrl)}
-                      className="bg-gray-100 p-3 rounded-lg hover:bg-gray-200 transition self-start sm:self-auto"
-                    >
-                      <FaCopy />
-                    </button>
-                    <button
-                      onClick={() => deleteUrl(u.id)}
-                      className="bg-red-100 text-red-600 p-3 rounded-lg hover:bg-red-200 transition"
-                    >
-                      Delete
-                    </button>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => copyLink(shortUrl)}
+                        className="bg-gray-100 p-3 rounded-lg hover:bg-gray-200 transition self-start sm:self-auto"
+                      >
+                        <FaCopy />
+                      </button>
+                      <button
+                        onClick={() => deleteUrl(u.id)}
+                        className="bg-red-100 text-red-600 p-3 rounded-lg hover:bg-red-200 transition"
+                      >
+                        Delete
+                      </button>
+                    </div>
+
                   </div>
                 );
               })

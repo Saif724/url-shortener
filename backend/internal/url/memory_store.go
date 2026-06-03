@@ -84,3 +84,7 @@ func (m *MemoryStore) Delete(id string) error {
 	delete(m.urls, id)
 	return nil
 }
+
+func (m *MemoryStore) IncrementClicks(id string) error {
+	return nil
+}

@@ -7,4 +7,5 @@ type Store interface {
 	GetByURLAndUser(originalURL string, userID string) (URL, bool)
 	GetByUserID(userID string) ([]URL, error)
 	Delete(id string) error
+	IncrementClicks(id string) error
 }

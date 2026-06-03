@@ -75,3 +75,7 @@ func (s *Service) Resolve(id string) (string, bool) {
 	}
 	return url.URL, true
 }
+
+func (s *Service) IncrementClicks(id string) error {
+	return s.store.IncrementClicks(id)
+}
