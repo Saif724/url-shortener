@@ -5,13 +5,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
 )
 
 func Run(db *sql.DB) error {
-	files, err := filepath.Glob("db/migrations/*.sql")
+	files, err := filepath.Glob("db/migrations/*.up.sql")
 	if err != nil {
 		return err
 	}
+
+	sort.Strings(files)
 
 	for _, file:= range files {
 		content, err := os.ReadFile(file)
