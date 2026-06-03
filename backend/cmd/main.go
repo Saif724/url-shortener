@@ -12,6 +12,7 @@ import (
 	"urlshortener/backend/internal/cache"
 	"urlshortener/backend/internal/config"
 	"urlshortener/backend/internal/middleware"
+	"urlshortener/backend/internal/migrate"
 	"urlshortener/backend/internal/url"
 	"urlshortener/backend/internal/user"
 
@@ -84,6 +85,9 @@ func main() {
 	jwtService := user.NewJWTService(cfg.JWTSecret)
 
 	urlService := url.NewService(store)
+	if err :=migrate.Run(store.DB()); err!= nil {
+		panic(err)
+	}
 
 	userStore := user.NewPostgresUserStore(store.DB())
 	userService := user.NewUserService(userStore, jwtService)

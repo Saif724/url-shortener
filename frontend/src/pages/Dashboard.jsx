@@ -225,6 +225,16 @@ export default function Dashboard() {
                         Short URL
                       </span>
 
+                      <div className="mt-2 flex items-center gap-2">
+                        <span className="text-sm text-gray-500">
+                          Clicks:
+                        </span>
+
+                        <span className="text-sm font-semibold text-gray-800">
+                          {u.clicks || 0}
+                        </span>
+                      </div>
+
                       <a 
                         href={shortUrl}
                         target="_blank"
