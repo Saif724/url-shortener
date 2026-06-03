@@ -81,6 +81,7 @@ func (h *Handler) Redirect(w http.ResponseWriter, r *http.Request) {
 
 	cachedURL, err := h.cache.Get(r.Context(), id)
 	if err == nil && cachedURL != "" {
+		_ = h.service.IncrementClicks(id)
 		http.Redirect(w, r, cachedURL, http.StatusFound)
 		return
 	}
