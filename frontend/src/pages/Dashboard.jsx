@@ -82,6 +82,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     fetchUrls();
+
+    const onFocus = () => fetchUrls();
+    window.addEventListener("focus", onFocus);
+
+    return () => window.removeEventListener("focus", onFocus);
   }, [fetchUrls]);
 
   const deleteUrl = async (id) => {
@@ -148,7 +153,7 @@ export default function Dashboard() {
             </p>
 
             <h2 className="text-3xl font-bold mt-2">
-              {urls.reduce((sum, u) => sum + (u.clicks || 0), 0)}
+              {urls.reduce((sum, u) => sum + Number(u.clicks || 0), 0)}
             </h2>
           </div>
         </div>
