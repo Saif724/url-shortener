@@ -64,7 +64,7 @@ export default function Dashboard() {
         toast.success("Shortened!");
         await fetchUrls();
       } else {
-          toast.error(data.message || "Failed to shorten");
+          toast.error(data.error || "Failed to shorten");
       }
     } catch(err) {
       console.log(err);
@@ -107,7 +107,7 @@ export default function Dashboard() {
         toast.success("URL deleted");
         await fetchUrls();
       } else {
-        toast.error(data.message || "Delete failed");
+        toast.error(data.error || "Delete failed");
       }
     }catch (err) {
       console.log(err);
