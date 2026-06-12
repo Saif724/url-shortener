@@ -16,6 +16,11 @@ export default function UrlInput( {onShorten }){
                 placeholder="https://example.com"
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
+                onKeyDown={(e)=>{
+                    if(e.key==="Enter"){
+                        handleSubmit();
+                    }
+                }}
             />
 
             <button

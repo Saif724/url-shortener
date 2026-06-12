@@ -9,14 +9,29 @@ export default function Register() {
     const [password, setPassword] = useState("");
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const [errors, setErrors] = useState({
+        email: "",
+        password: "",
+    });
 
     const navigate= useNavigate();
 
     const handleRegister = async () => {
-        if (!email || !password) {
-            toast.error("Fill all fields");
+        const newErrors = {
+            email: "",
+            password: "",
+        };
+        if(!email.trim()) {
+            newErrors.email = "Email is required";
+        }
+        if(!password.trim()){
+            newErrors.password = "Password is required";
+        }
+        setErrors(newErrors);
+        if (newErrors.email || newErrors.password){
             return;
         }
+
         try {
             setLoading(true);
 
@@ -34,10 +49,14 @@ export default function Register() {
                 toast.success("Account created");
                 navigate("/");
             } else {
-                toast.error(data.error || "Register failed");
+                toast.error(data.error || "Register failed", {
+                    id: data.error || "register-failed",
+                });
             }
         } catch {
-            toast.error("Server error");
+            toast.error("Server error",{
+                id: "server-error",
+        });
         } finally {
             setLoading(false);
         }
@@ -60,19 +79,55 @@ export default function Register() {
 
                     <input
                         type="email"
+                        autoFocus
+                        autoComplete="email"
                         placeholder="Email"
                         value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full bg-transparent border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                        onChange={(e) => {
+                            setEmail(e.target.value);
+                            
+                            if(errors.email){
+                                setErrors((prev)=>({
+                                    ...prev,
+                                    email:"",
+                                }));
+                            }
+                        }}
+                        onKeyDown={(e)=>{
+                            if (e.key === "Enter") {
+                                handleRegister();
+                            }
+                        }}
+                        className="w-full bg-transparent border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
                     />
+                    {errors.email && (
+                        <p className="text-sm text-red-400 mt-1">
+                            {errors.email}
+                        </p>
+                    )}
 
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
+                            autoComplete="current-password"
                             placeholder="Password"
                             value={password}
-                            onChange={(e)=> setPassword(e.target.value)}
-                            className="w-full bg-transparent border border-white/10 rounded-xl px-4 py-3 pr-10 text-white placeholder-gray-500 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20"
+                            onChange={(e)=> {
+                                setPassword(e.target.value);
+
+                                if(errors.password){
+                                    setErrors((prev)=>({
+                                        ...prev,
+                                        password: "",
+                                    }));
+                                }
+                            }}
+                            onKeyDown={(e)=>{
+                                if(e.key==="Enter"){
+                                    handleRegister();
+                                }
+                            }}
+                            className="w-full bg-transparent border border-white/10 rounded-xl px-4 py-3 pr-10 text-white placeholder-gray-500 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
                         />
 
                         <button
@@ -89,11 +144,22 @@ export default function Register() {
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
+                    {errors.password && (
+                        <p className="text-sm text-red-400 mt-1">
+                            {errors.password}
+                        </p>
+                    )}
 
                     <button
                         onClick={handleRegister}
                         disabled={loading}
-                        className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
+                        className="w-full py-3 rounded-xl font-semibold
+                        bg-gradient-to-r from-blue-500 to-purple-500
+                        text-white
+                        hover:opacity-90
+                        transition-all duration-200
+                        disabled:opacity-90
+                        disabled:cursor-not-allowed"
                     >
                         {loading ? "Crating account..." : "Create Account"}
                     </button>

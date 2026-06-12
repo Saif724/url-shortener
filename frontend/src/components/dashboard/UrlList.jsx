@@ -6,6 +6,7 @@ export default function UrlList({
   loading,
   onCopy,
   onDelete,
+  onQR,
   API_BASE,
 }) {
   if (loading) return <SkeletonList />;
@@ -31,6 +32,7 @@ export default function UrlList({
           u={u}
           onCopy={onCopy}
           onDelete={onDelete}
+          onQR={onQR}
           API_BASE={API_BASE}
         />
       ))}

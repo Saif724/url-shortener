@@ -6,15 +6,38 @@ import StatsCards from "../components/dashboard/StatsCards";
 import UrlInput from "../components/dashboard/UrlInput";
 import Header from "../components/dashboard/Header";
 import UrlList from "../components/dashboard/UrlList";
-
+import DeleteModal from "../components/dashboard/DeleteModal";
+import QRModal from "../components/dashboard/QRModal";
 export default function Dashboard() {
   const [urls, setUrls] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [showQR, setShowQR] = useState(false);
+  const [qrValue, setQrValue] = useState("");
 
   const navigate = useNavigate();
 
   const getToken = useCallback(() => localStorage.getItem("token"),[]);
 
+  const openQR = (shortUrl) => {
+    setQrValue(shortUrl);
+    setShowQR(true);
+  };
+
+  const openDeleteModal = (id) => {
+    setSelectedId(id);
+    setShowDeleteModal(true);
+  }
+  
+  const confirmDelete = async () => {
+    if (!selectedId) return;
+
+    await deleteUrl(selectedId);
+
+    setSelectedId(null);
+    setShowDeleteModal(false);
+  };
 
   const fetchUrls = useCallback(async () => {
     try {
@@ -44,7 +67,9 @@ export default function Dashboard() {
 
   const shorten = async (url) => {
     if (!url) {
-      toast.error("Please enter a URL");
+      toast.error("Please enter a URL", {
+        id: "empty-url"
+      });
       return;
     }
 
@@ -64,11 +89,15 @@ export default function Dashboard() {
         toast.success("Shortened!");
         await fetchUrls();
       } else {
-          toast.error(data.error || "Failed to shorten");
+          toast.error(data.error || "Failed to shorten", {
+            id: data.error || "failed-to-shorten", 
+          });
       }
     } catch(err) {
       console.log(err);
-      toast.error("Server error");
+      toast.error("Server error", {
+        id: "server-error",
+      });
     }
   };
 
@@ -107,11 +136,15 @@ export default function Dashboard() {
         toast.success("URL deleted");
         await fetchUrls();
       } else {
-        toast.error(data.error || "Delete failed");
+        toast.error(data.error || "Delete failed",{
+          id: data.error || "delete-failed",
+        });
       }
     }catch (err) {
       console.log(err);
-      toast.error("Server error");
+      toast.error("Server error", {
+        id: "server-error",
+      });
     }
   };
 
@@ -126,12 +159,30 @@ export default function Dashboard() {
 
         <UrlInput onShorten={shorten} />
 
+
+
         <UrlList
           urls={urls}
           loading={loading}
           onCopy={copyLink}
-          onDelete={deleteUrl}
+          onDelete={openDeleteModal}
+          onQR={openQR}
           API_BASE={API_BASE}
+        />
+
+        <DeleteModal
+          show={showDeleteModal}
+          onClose={()=>{
+            setShowDeleteModal(false);
+            setSelectedId(null);
+          }}
+          onConfirm={confirmDelete}
+        />
+
+        <QRModal
+          show={showQR}
+          value={qrValue}
+          onClose={()=>setShowQR(false)}
         />
 
       </div>

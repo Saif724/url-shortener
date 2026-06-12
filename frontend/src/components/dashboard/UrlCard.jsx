@@ -1,6 +1,6 @@
-import { FaCopy } from "react-icons/fa";
+import { FaCopy,FaQrcode } from "react-icons/fa";
 
-export default function UrlCard({ u, onCopy, onDelete, API_BASE }) {
+export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE }) {
   const shortUrl = `${API_BASE}/r/${u.id}`;
 
   return (
@@ -50,12 +50,21 @@ export default function UrlCard({ u, onCopy, onDelete, API_BASE }) {
         {/* COPY */}
         <button
           onClick={() => onCopy(shortUrl)}
+          title="Copy"
           className="
             bg-white/10 hover:bg-white/20
-            text-white p-3 rounded-xl transition
+            text-white p-3 rounded-xl transition text-white
           "
         >
           <FaCopy />
+        </button>
+
+        <button
+          onClick={()=> onQR(shortUrl)}
+          title="Generate QR Code"
+          className="bg-white/10 hover:bg-white/20 p-3 rounded-xl transition text-white"
+        >
+          <FaQrcode/>
         </button>
 
         {/* DELETE */}
