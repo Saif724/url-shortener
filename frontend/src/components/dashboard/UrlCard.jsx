@@ -53,7 +53,7 @@ export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE }) {
           title="Copy"
           className="
             bg-white/10 hover:bg-white/20
-            text-white p-3 rounded-xl transition text-white
+            text-white p-3 rounded-xl transition
           "
         >
           <FaCopy />
