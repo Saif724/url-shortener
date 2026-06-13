@@ -1,4 +1,4 @@
-import { FaCopy,FaQrcode } from "react-icons/fa";
+import { FaCopy,FaQrcode,FaTrash } from "react-icons/fa";
 
 export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE }) {
   const shortUrl = `${API_BASE}/r/${u.id}`;
@@ -70,13 +70,14 @@ export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE }) {
         {/* DELETE */}
         <button
           onClick={() => onDelete(u.id)}
+          title="Delete"
           className="
             bg-red-500/20 text-red-300
             hover:bg-red-500/30
             p-3 rounded-xl transition
           "
         >
-          Delete
+          <FaTrash />
         </button>
       </div>
     </div>

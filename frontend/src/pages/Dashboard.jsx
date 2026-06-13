@@ -2,12 +2,14 @@ import { useState, useEffect, useCallback } from "react";
 import {useNavigate} from "react-router-dom";
 import API_BASE from "../api/api";
 import toast from "react-hot-toast";
-import StatsCards from "../components/dashboard/StatsCards";
-import UrlInput from "../components/dashboard/UrlInput";
-import Header from "../components/dashboard/Header";
-import UrlList from "../components/dashboard/UrlList";
-import DeleteModal from "../components/dashboard/DeleteModal";
-import QRModal from "../components/dashboard/QRModal";
+import StatsCards from "../components/StatsCards";
+import UrlInput from "../components/UrlInput";
+import Header from "../components/Header";
+import UrlList from "../components/UrlList";
+import DeleteModal from "../components/DeleteModal";
+import QRModal from "../components/QRModal";
+import SearchBar from "../components/SearchBar";
+
 export default function Dashboard() {
   const [urls, setUrls] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -15,6 +17,7 @@ export default function Dashboard() {
   const [selectedId, setSelectedId] = useState(null);
   const [showQR, setShowQR] = useState(false);
   const [qrValue, setQrValue] = useState("");
+  const [search, setSearch] = useState("");
 
   const navigate = useNavigate();
 
@@ -148,27 +151,52 @@ export default function Dashboard() {
     }
   };
 
+  const filteredUrls = urls.filter((u)=>
+    u.url.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0b1220] text-white px-4 py-6">
+    <div className="min-h-screen relative overflow-hidden bg-[#0b1220] text-white px-4 py-8">
       <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-purple-500 opacity-30 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-100px] right-[-100px] w-[300px] h-[300px] bg-blue-500 opacity-30 blur-[120px] rounded-full"></div>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="max-w-5xl mx-auto space-y-10">
         <Header onLogout={logout} />
+
+        <div className="h-px bg-white/10 my-4"/>
         
-        <StatsCards urls={urls} />
+        <div className="space-y-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">
+            Overview
+          </p>
+          <StatsCards urls={urls} />
+        </div>
 
-        <UrlInput onShorten={shorten} />
+        <div className="space-y-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">
+            Create & Search
+          </p>
+          <UrlInput onShorten={shorten} />
 
+          <SearchBar
+            search={search}
+            setSearch={setSearch}
+          />
+        </div>
 
-
-        <UrlList
-          urls={urls}
-          loading={loading}
-          onCopy={copyLink}
-          onDelete={openDeleteModal}
-          onQR={openQR}
-          API_BASE={API_BASE}
-        />
+        <div className="space-y-4">
+          <p className="text-xs text-gray-500 uppercase tracking-wider">
+            Your Links
+          </p>
+          <UrlList
+            urls={urls}
+            filteredUrls={filteredUrls}
+            loading={loading}
+            onCopy={copyLink}
+            onDelete={openDeleteModal}
+            onQR={openQR}
+            API_BASE={API_BASE}
+          />
+        </div>
 
         <DeleteModal
           show={showDeleteModal}
