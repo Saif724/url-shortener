@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard"
+import Dashboard from "./pages/Dashboard";
+import UrlDetails from "./pages/UrlDetails";
 import ProtectedRoute from "./routes/ProtectedRoute";
 
 function App() {
@@ -17,6 +18,9 @@ function App() {
               </ProtectedRoute>
           } 
          />
+
+
+        <Route path="/url/:id" element={<UrlDetails/>} />
       </Routes>
     </BrowserRouter>
   )

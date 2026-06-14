@@ -32,15 +32,6 @@ export default function Dashboard() {
     setSelectedId(id);
     setShowDeleteModal(true);
   }
-  
-  const confirmDelete = async () => {
-    if (!selectedId) return;
-
-    await deleteUrl(selectedId);
-
-    setSelectedId(null);
-    setShowDeleteModal(false);
-  };
 
   const fetchUrls = useCallback(async () => {
     try {
@@ -149,6 +140,16 @@ export default function Dashboard() {
         id: "server-error",
       });
     }
+  };
+
+    
+  const confirmDelete = async () => {
+    if (!selectedId) return;
+
+    await deleteUrl(selectedId);
+
+    setSelectedId(null);
+    setShowDeleteModal(false);
   };
 
   const filteredUrls = urls.filter((u)=>
