@@ -9,7 +9,8 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ResponsiveContainer
+  ResponsiveContainer,
+  CartesianGrid
 } from "recharts";
 
 export default function UrlDetails() {
@@ -54,18 +55,18 @@ export default function UrlDetails() {
 
   if (!urlData) {
     return (
-      <div className="min-h-screen bg-[#0b1220] text-white p-6">
+      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] p-6">
         <div className="max-w-3xl mx-auto">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition mb-6"
+            className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--text)] transition mb-6"
           >
             <FaArrowLeft />
             <span>Back</span>
           </button>
 
-          <div className="text-center text-gray-400 mt-20">
-            Loading / Not found
+          <div className="text-center text-[var(--muted)] mt-20">
+            Loading analytics...
           </div>
         </div>
       </div>
@@ -90,7 +91,7 @@ export default function UrlDetails() {
 
   const statusColor =
     clicks === 0
-      ? "text-gray-400"
+      ? "text-[var(--muted)]"
       : clicks < 10
       ? "text-yellow-400"
       : clicks < 50
@@ -98,18 +99,18 @@ export default function UrlDetails() {
       : "text-green-400";
 
   return (
-    <div className="min-h-screen bg-[#0b1220] text-white px-4 py-8">
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] px-4 py-8">
       <div className="max-w-4xl mx-auto space-y-8">
 
         {/* HEADER */}
         <div className="space-y-3">
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-[var(--muted)]">
             Dashboard / URL Details
           </div>
 
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-gray-400 hover:text-white transition"
+            className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--text)] transition"
           >
             <FaArrowLeft className="text-sm" />
             <span className="text-sm">Back</span>
@@ -119,37 +120,46 @@ export default function UrlDetails() {
         {/* ANALYTICS GRID */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-            <p className="text-gray-400 text-sm">Clicks</p>
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
+            <p className="text-[var(--muted)] text-sm">Clicks</p>
             <h2 className="text-3xl font-bold mt-2">{clicks}</h2>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-            <p className="text-gray-400 text-sm">Status</p>
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
+            <p className="text-[var(--muted)] text-sm">Status</p>
             <h2 className={`text-lg font-semibold mt-2 ${statusColor}`}>
               {status}
             </h2>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-            <p className="text-gray-400 text-sm">Analytics</p>
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
+            <p className="text-[var(--muted)] text-sm">Analytics</p>
             <FaChartLine className="text-2xl mt-3 text-blue-400" />
           </div>
 
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
-            <p className="text-gray-400 text-sm mb-4">Click Trend</p>
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
+            <p className="text-[var(--muted)] text-sm mb-4">Click Trend</p>
 
             {clicks === 0 ? (
-                <p className="text-gray-500 text-sm">No data yet</p>
+                <p className="text-[var(--muted)] text-sm">No data yet</p>
             ) : (
                 <div className="w-full h-[260px] min-h-[260px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData}>
-                    <XAxis dataKey="name" stroke="#9CA3AF" />
-                    <YAxis stroke="#9CA3AF" />
-                    <Tooltip />
+                    <XAxis dataKey="name" stroke="currentColor" tick={{fill: "var(--muted)"}} />
+                    <YAxis stroke="currentColor" tick={{fill: "var(--muted)"}} />
+                    <Tooltip 
+                      contentStyle={{
+                        background: "var(--card)",
+                        border: "1px solid var(--border)",
+                        borderRadius: "12px",
+                        color: "var(--text)"
+                      }}
+                    />
+
+                    <CartesianGrid strokeDasharray="3 3" opacity={0.15}/>
                     <Line
                         type="monotone"
                         dataKey="clicks"
@@ -165,12 +175,12 @@ export default function UrlDetails() {
         {/* URL INFO */}
         <div className="space-y-4">
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
             <div className="flex justify-between items-center">
-              <p className="text-gray-400 text-sm">Original URL</p>
+              <p className="text-[var(--muted)] text-sm">Original URL</p>
               <button
                 onClick={() => copy(urlData.url)}
-                className="text-gray-400 hover:text-white"
+                className="text-[var(--muted)] hover:text-[var(--text)]"
               >
                 <FaCopy />
               </button>
@@ -178,12 +188,12 @@ export default function UrlDetails() {
             <p className="break-words mt-2">{urlData.url}</p>
           </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-5">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
             <div className="flex justify-between items-center">
-              <p className="text-gray-400 text-sm">Short URL</p>
+              <p className="text-[var(--muted)] text-sm">Short URL</p>
               <button
                 onClick={() => copy(shortUrl)}
-                className="text-gray-400 hover:text-white"
+                className="text-[var(--muted)] hover:text-[var(--text)]"
               >
                 <FaCopy />
               </button>
@@ -194,6 +204,7 @@ export default function UrlDetails() {
               <a
                 href={shortUrl}
                 target="_blank"
+                rel="noopener noreferrer"
                 className="text-blue-400 hover:text-blue-300 underline"
               >
                 {shortUrl}

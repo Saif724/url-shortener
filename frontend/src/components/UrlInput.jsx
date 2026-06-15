@@ -1,36 +1,79 @@
 import { useState } from "react";
+import { FaLink, FaSpinner } from "react-icons/fa";
 
-export default function UrlInput( {onShorten }){
-    const [url, setUrl] = useState("");
+export default function UrlInput({ onShorten }) {
+  const [url, setUrl] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const handleSubmit = async () => {
-        await onShorten(url);
-        setUrl("");
-    };
+  const handleSubmit = async () => {
+    if (!url.trim()) return;
 
-    return (
-        <div className="bg-white/5 backdrop-blur-md border border-white/10
-        p-4 rounded-2xl flex flex-col sm:flex-row gap-3">
-            <input
-                className="flex-1 bg-transparent border border-white/10 rounded-xl px-4 py-3 outline-none text-white placeholder-gray-400 focus:border-blue-400"
-                placeholder="https://example.com"
-                value={url}
-                onChange={(e) => setUrl(e.target.value)}
-                onKeyDown={(e)=>{
-                    if(e.key==="Enter"){
-                        handleSubmit();
-                    }
-                }}
-            />
+    try {
+      setLoading(true);
+      await onShorten(url);
+      setUrl("");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-            <button
-                onClick={handleSubmit}
-                className="px-6 py-3 rounded-xl font-medium
-                bg-gradient-to-r from-blue-500 to-purple-500
-                hover:opacity-90 transition shadow-lg text-white"
-            >
-                Shorten
-            </button>
-        </div>
-    );
+  return (
+    <div
+      className="
+        bg-[var(--card)] border border-[var(--border)]
+        rounded-2xl p-2
+        flex flex-col sm:flex-row gap-3
+        items-stretch
+        hover:bg-white/10 transition
+      "
+    >
+
+      {/* INPUT SECTION */}
+      <div className="flex items-center gap-3 flex-1">
+
+        <FaLink className="text-gray-400 text-sm shrink-0" />
+
+        <input
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSubmit();
+          }}
+          placeholder="Paste a long URL here..."
+          className="
+            w-full bg-transparent
+            outline-none text-[var(--text)]
+            placeholder-[var(--muted)]
+            text-sm sm:text-base
+          "
+        />
+      </div>
+
+      {/* BUTTON */}
+      <button
+        onClick={handleSubmit}
+        disabled={loading || !url.trim()}
+        className={`
+          px-5 py-3 rounded-xl font-medium
+          flex items-center justify-center gap-2
+          transition
+
+          ${
+            loading || !url.trim()
+              ? "bg-blue-500/20 text-blue-300 opacity-50 cursor-not-allowed"
+              : "bg-gradient-to-r from-blue-500 to-purple-500 hover:opacity-90 text-white"
+          }
+        `}
+      >
+        {loading ? (
+          <>
+            <FaSpinner className="animate-spin" />
+            Shortening...
+          </>
+        ) : (
+          "Shorten URL"
+        )}
+      </button>
+    </div>
+  );
 }

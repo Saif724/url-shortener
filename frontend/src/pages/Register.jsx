@@ -14,33 +14,29 @@ export default function Register() {
         password: "",
     });
 
-    const navigate= useNavigate();
+    const navigate = useNavigate();
 
     const handleRegister = async () => {
         const newErrors = {
             email: "",
             password: "",
         };
-        if(!email.trim()) {
-            newErrors.email = "Email is required";
-        }
-        if(!password.trim()){
-            newErrors.password = "Password is required";
-        }
+
+        if (!email.trim()) newErrors.email = "Email is required";
+        if (!password.trim()) newErrors.password = "Password is required";
+
         setErrors(newErrors);
-        if (newErrors.email || newErrors.password){
-            return;
-        }
+        if (newErrors.email || newErrors.password) return;
 
         try {
             setLoading(true);
 
-            const res = await fetch (`${API_BASE}/register`,{
+            const res = await fetch(`${API_BASE}/register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({email, password})
+                body: JSON.stringify({ email, password }),
             });
 
             const data = await res.json();
@@ -54,29 +50,35 @@ export default function Register() {
                 });
             }
         } catch {
-            toast.error("Server error",{
+            toast.error("Server error", {
                 id: "server-error",
-        });
+            });
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen relative overflow-hidden bg-[#0b1220] flex items-center justify-center px-4">
-            <div className="absolute top-[-120px] left-[-120px] w-80 h-80 bg-purple-500 opacity-30 blur-[120px] rounded-full"></div>
-            <div className="absolute bottom-[-120px] right-[-120px] w-80 h-80 bg-blue-500 opacity-30 blur-[120px] rounded-full"></div>
-            <div className="relative z-10 w-full max-w-md bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-8 shadow-2xl">
-                <h1 className="text-4xl font-bold text-white text-center">
+        <div className="min-h-screen relative overflow-hidden bg-[var(--bg)] flex items-center justify-center px-4">
+
+            {/* background glow */}
+            <div className="absolute top-[-120px] left-[-120px] w-80 h-80 bg-purple-500 opacity-20 blur-[120px] rounded-full"></div>
+            <div className="absolute bottom-[-120px] right-[-120px] w-80 h-80 bg-blue-500 opacity-20 blur-[120px] rounded-full"></div>
+
+            {/* card */}
+            <div className="relative z-10 w-full max-w-md bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 shadow-2xl">
+
+                <h1 className="text-4xl font-bold text-[var(--text)] text-center">
                     Create Account
                 </h1>
 
-                <p className="text-gray-400 text-center mt-2">
+                <p className="text-[var(--muted)] text-center mt-2">
                     Join and start shortening URLs
                 </p>
 
                 <div className="mt-8 space-y-4">
 
+                    {/* EMAIL */}
                     <input
                         type="email"
                         autoFocus
@@ -85,98 +87,72 @@ export default function Register() {
                         value={email}
                         onChange={(e) => {
                             setEmail(e.target.value);
-                            
-                            if(errors.email){
-                                setErrors((prev)=>({
-                                    ...prev,
-                                    email:"",
-                                }));
+                            if (errors.email) {
+                                setErrors((prev) => ({ ...prev, email: "" }));
                             }
                         }}
-                        onKeyDown={(e)=>{
-                            if (e.key === "Enter") {
-                                handleRegister();
-                            }
+                        onKeyDown={(e) => {
+                            if (e.key === "Enter") handleRegister();
                         }}
-                        className="w-full bg-transparent border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        className="w-full bg-transparent border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text)] placeholder-[var(--muted)] outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
                     />
+
                     {errors.email && (
-                        <p className="text-sm text-red-400 mt-1">
-                            {errors.email}
-                        </p>
+                        <p className="text-sm text-red-400">{errors.email}</p>
                     )}
 
+                    {/* PASSWORD */}
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
                             autoComplete="current-password"
                             placeholder="Password"
                             value={password}
-                            onChange={(e)=> {
+                            onChange={(e) => {
                                 setPassword(e.target.value);
-
-                                if(errors.password){
-                                    setErrors((prev)=>({
-                                        ...prev,
-                                        password: "",
-                                    }));
+                                if (errors.password) {
+                                    setErrors((prev) => ({ ...prev, password: "" }));
                                 }
                             }}
-                            onKeyDown={(e)=>{
-                                if(e.key==="Enter"){
-                                    handleRegister();
-                                }
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") handleRegister();
                             }}
-                            className="w-full bg-transparent border border-white/10 rounded-xl px-4 py-3 pr-10 text-white placeholder-gray-500 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                            className="w-full bg-transparent border border-[var(--border)] rounded-xl px-4 py-3 pr-10 text-[var(--text)] placeholder-[var(--muted)] outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
                         />
 
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="
-                                absolute right-3 top-1/2 -translate-y-1/2
-                                text-gray-400
-                                hover:bg-white/10
-                                p-1 rounded-md
-                                transition-all duration-200
-                            "
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:bg-white/10 p-1 rounded-md transition"
                         >
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
+
                     {errors.password && (
-                        <p className="text-sm text-red-400 mt-1">
-                            {errors.password}
-                        </p>
+                        <p className="text-sm text-red-400">{errors.password}</p>
                     )}
 
+                    {/* BUTTON */}
                     <button
                         onClick={handleRegister}
                         disabled={loading}
-                        className="w-full py-3 rounded-xl font-semibold
-                        bg-gradient-to-r from-blue-500 to-purple-500
-                        text-white
-                        hover:opacity-90
-                        transition-all duration-200
-                        disabled:opacity-90
-                        disabled:cursor-not-allowed"
+                        className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        {loading ? "Crating account..." : "Create Account"}
+                        {loading ? "Creating account..." : "Create Account"}
                     </button>
-
                 </div>
 
-                <p className="text-center text-gray-400 mt-6">
+                <p className="text-center text-[var(--muted)] mt-6">
                     Already have an account?
                 </p>
 
                 <button
-                    onClick={()=> navigate("/")}
-                    className="mt-3 w-full border border-white/10 p-3 rounded-xl text-white hover:bg-white/10 transition"
+                    onClick={() => navigate("/")}
+                    className="mt-3 w-full border border-[var(--border)] p-3 rounded-xl text-[var(--text)] hover:bg-white/10 transition"
                 >
                     Login
                 </button>
-
             </div>
         </div>
     );

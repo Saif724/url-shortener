@@ -4,8 +4,18 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import UrlDetails from "./pages/UrlDetails";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import { useState, useEffect } from "react";
 
 function App() {
+  const [theme, setTheme] = useState(
+    localStorage.getItem("theme") || "dark"
+  );
+
+  useEffect(() => {
+    document.documentElement.classList.remove("dark", "light");
+    document.documentElement.classList.add(theme);
+    localStorage.setItem("theme", theme);
+  }, [theme]);
   return (
     <BrowserRouter>
       <Routes>
@@ -14,7 +24,7 @@ function App() {
         <Route 
           path="/dashboard" element={
             <ProtectedRoute>
-              <Dashboard/>
+              <Dashboard theme={theme} setTheme={setTheme} />
               </ProtectedRoute>
           } 
          />

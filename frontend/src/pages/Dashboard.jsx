@@ -10,7 +10,7 @@ import DeleteModal from "../components/DeleteModal";
 import QRModal from "../components/QRModal";
 import SearchBar from "../components/SearchBar";
 
-export default function Dashboard() {
+export default function Dashboard({theme, setTheme}) {
   const [urls, setUrls] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -18,6 +18,8 @@ export default function Dashboard() {
   const [showQR, setShowQR] = useState(false);
   const [qrValue, setQrValue] = useState("");
   const [search, setSearch] = useState("");
+  const [viewMode, setViewMode] = useState("list");
+  const [copiedId, setCopiedId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -95,9 +97,11 @@ export default function Dashboard() {
     }
   };
 
-  const copyLink = async (shortUrl) => {
+  const copyLink = async (shortUrl, id) => {
     await navigator.clipboard.writeText(shortUrl);
-    toast.success("Link copied");
+    setCopiedId(id);
+
+    setTimeout(() => setCopiedId(null), 1200);
   };
 
   const logout = () => {
@@ -157,23 +161,23 @@ export default function Dashboard() {
   );
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#0b1220] text-white px-4 py-8">
+    <div className="min-h-screen relative overflow-hidden bg-[var(--bg)] text-[var(--text)] px-4 py-8">
       <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-purple-500 opacity-30 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-100px] right-[-100px] w-[300px] h-[300px] bg-blue-500 opacity-30 blur-[120px] rounded-full"></div>
-      <div className="max-w-5xl mx-auto space-y-10">
-        <Header onLogout={logout} />
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        <Header onLogout={logout} theme={theme} setTheme={setTheme} />
 
         <div className="h-px bg-white/10 my-4"/>
         
         <div className="space-y-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">
+          <p className="text-xs text-[var(--muted)] uppercase tracking-wider">
             Overview
           </p>
           <StatsCards urls={urls} />
         </div>
 
         <div className="space-y-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">
+          <p className="text-xs text-[var(--muted)] uppercase tracking-wider">
             Create & Search
           </p>
           <UrlInput onShorten={shorten} />
@@ -185,17 +189,55 @@ export default function Dashboard() {
         </div>
 
         <div className="space-y-4">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">
-            Your Links
-          </p>
+          <div className="flex items-center justify-between">
+
+            <p className="text-xs text-[var(--muted)] uppercase tracking-wider">
+              Your Links
+            </p>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setViewMode("list")}
+                className={`
+                  px-3 py-1.5 rounded-lg text-xs border transition font-medium
+
+                  ${
+                    viewMode === "list"
+                      ? "bg-blue-500/20 text-blue-300 border-blue-400/30"
+                      : "bg-[var(--card)] text-[var(--muted)] border-[var(--border)] hover:text-[var(--text)] hover:bg-[var(--hover)]"
+                  }
+                `}
+              >
+                List
+              </button>
+
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`
+                  px-3 py-1.5 rounded-lg text-xs border transition font-medium
+
+                  ${
+                    viewMode === "grid"
+                      ? "bg-blue-500/20 text-blue-300 border-blue-400/30"
+                      : "bg-[var(--card)] text-[var(--muted)] border-[var(--border)] hover:text-[var(--text)] hover:bg-[var(--hover)]"
+                  }
+                `}
+              >
+                Grid
+              </button>
+            </div>
+
+          </div>
           <UrlList
             urls={urls}
             filteredUrls={filteredUrls}
             loading={loading}
             onCopy={copyLink}
+            copiedId={copiedId}
             onDelete={openDeleteModal}
             onQR={openQR}
             API_BASE={API_BASE}
+            viewMode={viewMode}
           />
         </div>
 

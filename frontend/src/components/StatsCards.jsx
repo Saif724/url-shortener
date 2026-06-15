@@ -8,19 +8,19 @@ export default function StatsCards({urls}) {
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition">
+            <div className="bg-[var(--card)] backdrop-blur-md border border-[var(--border)] rounded-2xl p-5 hover:bg-white/10 transition">
                 <div className="flex justify-between items-start">
 
                     <div>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-[var(--muted)]">
                             Total URLs
                         </p>
 
-                        <h2 className="text-4xl font-bold text-white mt-3">
+                        <h2 className="text-4xl font-bold text-[var(--text)] mt-3">
                             {urls.length}
                         </h2>
 
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-[var(--text)] mt-2">
                             Your created links
                         </p>
                     </div>
@@ -31,19 +31,19 @@ export default function StatsCards({urls}) {
                 </div>
             </div>
 
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-5 hover:bg-white/10 transition">
+            <div className="bg-[var(--card)] backdrop-blur-md border border-[var(--border)] rounded-2xl p-5 hover:bg-white/10 transition">
                 <div className="flex justify-between items-start">
 
                     <div>
-                        <p className="text-sm text-gray-400">
+                        <p className="text-sm text-[var(--muted)]">
                             Total Clicks
                         </p>
 
-                        <h2 className="text-4xl font-bold text-white mt-3">
+                        <h2 className="text-4xl font-bold text-[var(--text)] mt-3">
                             {totalClicks}
                         </h2>
 
-                        <p className="text-xs text-gray-500 mt-2">
+                        <p className="text-xs text-[var(--text)] mt-2">
                             Across all links
                         </p>
                     </div>

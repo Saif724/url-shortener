@@ -1,143 +1,130 @@
 import {
   FaChartBar,
-  FaEllipsisV,
   FaCopy,
   FaQrcode,
   FaTrash
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
 
-export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE }) {
+export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE, copied }) {
   const navigate = useNavigate();
   const shortUrl = `${API_BASE}/r/${u.id}`;
-  const [openMenu, setOpenMenu] = useState(false);
+
+
+
 
   return (
     <div
       className="
-        bg-white/5 border border-white/10 rounded-2xl p-6
-        hover:bg-white/10 transition
-        flex justify-between items-center gap-6
+        bg-[var(--card)] border border-[var(--border)]
+        rounded-2xl p-4 sm:p-5
+        hover:bg-[var(--hover)] hover:scale-[1.01]
+        transition-all duration-200
+        flex flex-col gap-4
       "
     >
 
-      {/* LEFT SIDE */}
-      <div className="flex flex-col flex-1 space-y-2">
-
-        {/* ORIGINAL URL */}
+      {/* URLs */}
+      <div className="space-y-2">
         <div>
-          <p className="text-xs text-gray-400">Original URL</p>
+          <p className="text-xs text-[var(--muted)]">Original</p>
           <a
             href={u.url}
             target="_blank"
             rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="text-gray-200 font-medium break-all hover:text-white"
+            title={u.url}
+            className="
+              text-sm text-[var(--text)] hover:opacity-80
+              break-words line-clamp-2
+            "
           >
             {u.url}
           </a>
         </div>
 
-        {/* SHORT URL */}
         <div>
-          <p className="text-xs text-gray-400">Short URL</p>
+          <p className="text-xs text-[var(--muted)]">Short</p>
           <a
             href={shortUrl}
             target="_blank"
             rel="noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="text-blue-400 text-sm break-all hover:text-blue-300"
+            title={shortUrl}
+            className="block truncate text-[var(--accent)] hover:text-blue-300 text-sm"
           >
             {shortUrl}
           </a>
         </div>
-
-        {/* STATS */}
-        <p className="text-xs text-gray-400">
-          {Number(u.clicks) || 0} clicks
-        </p>
-
       </div>
 
-      {/* RIGHT SIDE (PROPERLY CENTERED) */}
-      <div className="flex items-center gap-3 self-center">
 
-        {/* ANALYTICS */}
+      {/* stats + analytics (IMPORTANT ACTION) */}
+      <div className="flex items-center justify-between">
+        <span className="text-xs text-[var(--muted)]">
+          {Number(u.clicks) || 0} clicks
+        </span>
+
         <button
           onClick={() => navigate(`/url/${u.id}`)}
           className="
             flex items-center gap-2
-            bg-blue-500/20 text-blue-300
-            hover:bg-blue-500/30
-            px-4 py-2 rounded-xl text-sm
+            px-4 py-2 rounded-xl
+            bg-[var(--card)] border border-[var(--border)]
+            text-[var(--accent)]
+            hover:bg-blue-500/10
+            font-medium text-sm
+            transition
           "
         >
           <FaChartBar />
           Analytics
         </button>
-
-        {/* MENU */}
-        <div className="relative">
-
-          <button
-            onClick={() => setOpenMenu(!openMenu)}
-            className="
-              w-10 h-10 flex items-center justify-center
-              bg-white/10 hover:bg-white/20
-              rounded-xl transition
-            "
-          >
-            <FaEllipsisV />
-          </button>
-
-          {openMenu && (
-            <div className="
-              absolute right-0 mt-2 w-40
-              bg-[#111827] border border-white/10
-              rounded-xl shadow-lg z-50
-              overflow-hidden
-            ">
-
-              <button
-                onClick={() => {
-                  onCopy(shortUrl);
-                  setOpenMenu(false);
-                }}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/10"
-              >
-                <FaCopy />
-                Copy
-              </button>
-
-              <button
-                onClick={() => {
-                  onQR(shortUrl);
-                  setOpenMenu(false);
-                }}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-white/10"
-              >
-                <FaQrcode />
-                QR Code
-              </button>
-
-              <button
-                onClick={() => {
-                  onDelete(u.id);
-                  setOpenMenu(false);
-                }}
-                className="flex items-center gap-2 w-full px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
-              >
-                <FaTrash />
-                Delete
-              </button>
-
-            </div>
-          )}
-        </div>
-
       </div>
 
+      {/* ACTIONS */}
+      <div className="flex flex-wrap gap-2">
+
+        <button
+          onClick={() => onCopy(shortUrl, u.id)}
+          className={`
+            px-3 py-2 rounded-lg text-sm
+            flex items-center gap-2
+            transition
+
+            ${copied
+              ? "bg-green-500/20 text-[var(--text)]"
+              : "bg-[var(--bg)] hover:bg-[var(--hover)]"}
+          `}
+        >
+          <FaCopy />
+          {copied ? "Copied!" : "Copy"}
+        </button>
+
+        <button
+          onClick={() => onQR(shortUrl)}
+          className="
+            px-3 py-2 rounded-lg text-sm
+            bg-[var(--bg)] hover:bg-[var(--hover)]
+            transition flex items-center gap-2
+          "
+        >
+          <FaQrcode />
+          QR
+        </button>
+
+        <button
+          onClick={() => onDelete(u.id)}
+          className="
+            px-3 py-2 rounded-lg text-sm
+            bg-red-500/10 text-red-400
+            hover:bg-red-500/20
+            transition flex items-center gap-2
+          "
+        >
+          <FaTrash />
+          Delete
+        </button>
+
+      </div>
     </div>
   );
 }
