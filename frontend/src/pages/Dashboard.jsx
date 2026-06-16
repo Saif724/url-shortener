@@ -20,6 +20,7 @@ export default function Dashboard({theme, setTheme}) {
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState("list");
   const [copiedId, setCopiedId] = useState(null);
+  const [sortBy, setSortBy] = useState("newest");
 
   const navigate = useNavigate();
 
@@ -101,7 +102,7 @@ export default function Dashboard({theme, setTheme}) {
     await navigator.clipboard.writeText(shortUrl);
     setCopiedId(id);
 
-    setTimeout(() => setCopiedId(null), 1200);
+    setTimeout(() => setCopiedId(null), 1000);
   };
 
   const logout = () => {
@@ -156,30 +157,57 @@ export default function Dashboard({theme, setTheme}) {
     setShowDeleteModal(false);
   };
 
-  const filteredUrls = urls.filter((u)=>
-    u.url.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredUrls = urls
+    .filter((u) =>
+      u.url.toLowerCase().includes(search.toLowerCase())
+    )
+    .sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.created_at) - new Date(a.created_at);
+
+        case "oldest":
+          return new Date(a.created_at) - new Date(b.created_at);
+
+        case "clicks_high":
+          return Number(b.clicks) - Number(a.clicks);
+
+        case "clicks_low":
+          return Number(a.clicks) - Number(b.clicks);
+
+        default:
+          return new Date(b.created_at) - new Date(a.created_at);
+      }
+    });
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[var(--bg)] text-[var(--text)] px-4 py-8">
       <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-purple-500 opacity-30 blur-[120px] rounded-full"></div>
       <div className="absolute bottom-[-100px] right-[-100px] w-[300px] h-[300px] bg-blue-500 opacity-30 blur-[120px] rounded-full"></div>
-      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+      <div className="max-w-5xl mx-auto space-y-10">
         <Header onLogout={logout} theme={theme} setTheme={setTheme} />
 
         <div className="h-px bg-white/10 my-4"/>
         
-        <div className="space-y-4">
-          <p className="text-xs text-[var(--muted)] uppercase tracking-wider">
-            Overview
-          </p>
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
+              Overview
+            </p>
+          </div>
           <StatsCards urls={urls} />
         </div>
 
-        <div className="space-y-4">
-          <p className="text-xs text-[var(--muted)] uppercase tracking-wider">
-            Create & Search
-          </p>
+        <div className="border-t border-[var(--border)] opacity-50" />
+
+        <div className="space-y-6">
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
+              Create & Search
+            </p>
+          </div>
           <UrlInput onShorten={shorten} />
 
           <SearchBar
@@ -188,12 +216,17 @@ export default function Dashboard({theme, setTheme}) {
           />
         </div>
 
-        <div className="space-y-4">
+        <div className="border-t border-[var(--border)] opacity-50" />
+
+        <div className="space-y-6">
           <div className="flex items-center justify-between">
 
-            <p className="text-xs text-[var(--muted)] uppercase tracking-wider">
+            <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+            <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
               Your Links
             </p>
+          </div>
 
             <div className="flex gap-2">
               <button
@@ -228,6 +261,16 @@ export default function Dashboard({theme, setTheme}) {
             </div>
 
           </div>
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value)}
+            className="bg-[var(--bg)] border border-[var(--border)] px-3 py-2 rounded-lg text-sm"
+          >
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+            <option value="clicks_high">Most Clicked</option>
+            <option value="clicks_low">Least Clicked</option>
+          </select>
           <UrlList
             urls={urls}
             filteredUrls={filteredUrls}

@@ -1,4 +1,5 @@
 import {
+  FaArrowRight,
   FaChartBar,
   FaCopy,
   FaQrcode,
@@ -10,114 +11,117 @@ export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE, copied })
   const navigate = useNavigate();
   const shortUrl = `${API_BASE}/r/${u.id}`;
 
-
-
-
   return (
     <div
       className="
-        bg-[var(--card)] border border-[var(--border)]
-        rounded-2xl p-4 sm:p-5
-        hover:bg-[var(--hover)] hover:scale-[1.01]
-        transition-all duration-200
-        flex flex-col gap-4
+        bg-[var(--card)]
+        border border-[var(--border)]
+        rounded-2xl p-6
+        hover:-translate-y-1 hover:shadow-xl
+        transition-all duration-300
+        flex flex-col gap-5
       "
     >
 
-      {/* URLs */}
-      <div className="space-y-2">
-        <div>
-          <p className="text-xs text-[var(--muted)]">Original</p>
-          <a
-            href={u.url}
-            target="_blank"
-            rel="noreferrer"
-            title={u.url}
-            className="
-              text-sm text-[var(--text)] hover:opacity-80
-              break-words line-clamp-2
-            "
-          >
-            {u.url}
-          </a>
-        </div>
-
-        <div>
-          <p className="text-xs text-[var(--muted)]">Short</p>
-          <a
-            href={shortUrl}
-            target="_blank"
-            rel="noreferrer"
-            title={shortUrl}
-            className="block truncate text-[var(--accent)] hover:text-blue-300 text-sm"
-          >
-            {shortUrl}
-          </a>
-        </div>
+      {/* ORIGINAL URL */}
+      <div className="space-y-1">
+        <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
+          Original URL
+        </p>
+        <a
+          href={u.url}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-[var(--text)] break-words hover:text-blue-400"
+        >
+          {u.url}
+        </a>
       </div>
 
+      {/* SHORT URL (PRIMARY FOCUS) */}
+      <div className="space-y-1">
+        <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
+          Short URL
+        </p>
+        <a
+          href={shortUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-blue-400 font-medium hover:underline break-all"
+        >
+          {shortUrl}
+        </a>
+      </div>
 
-      {/* stats + analytics (IMPORTANT ACTION) */}
-      <div className="flex items-center justify-between">
-        <span className="text-xs text-[var(--muted)]">
-          {Number(u.clicks) || 0} clicks
-        </span>
+      {/* ANALYTICS (SECONDARY INFO) */}
+      <div className="flex items-center justify-between pt-2">
+        <div>
+          <p className="text-xs text-[var(--muted)]">Total Clicks</p>
+          <p className="text-xl font-bold text-[var(--text)]">
+            {Number(u.clicks) || 0}
+          </p>
+        </div>
 
         <button
           onClick={() => navigate(`/url/${u.id}`)}
           className="
             flex items-center gap-2
-            px-4 py-2 rounded-xl
-            bg-[var(--card)] border border-[var(--border)]
-            text-[var(--accent)]
-            hover:bg-blue-500/10
-            font-medium text-sm
+            text-blue-400 hover:text-blue-300
+            text-sm font-medium
             transition
           "
         >
           <FaChartBar />
           Analytics
+          <FaArrowRight />
         </button>
       </div>
 
-      {/* ACTIONS */}
-      <div className="flex flex-wrap gap-2">
+      {/* ACTIONS GROUP (PRIMARY INTERACTION ZONE) */}
+      <div className="flex items-center justify-between pt-2">
 
-        <button
-          onClick={() => onCopy(shortUrl, u.id)}
-          className={`
-            px-3 py-2 rounded-lg text-sm
-            flex items-center gap-2
-            transition
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onCopy(shortUrl, u.id)}
+            className={`
+              flex items-center gap-2
+              px-4 py-2 rounded-xl text-sm
+              transition-all duration-200
 
-            ${copied
-              ? "bg-green-500/20 text-[var(--text)]"
-              : "bg-[var(--bg)] hover:bg-[var(--hover)]"}
-          `}
-        >
-          <FaCopy />
-          {copied ? "Copied!" : "Copy"}
-        </button>
+              ${copied
+                ? "bg-green-500/20 text-green-400 scale-105"
+                : "bg-[var(--bg)] hover:bg-[var(--hover)] text-[var(--text)]"
+              }
+            `}
+          >
+            <FaCopy />
+            {copied ? "Copied!" : "Copy"}
+          </button>
 
-        <button
-          onClick={() => onQR(shortUrl)}
-          className="
-            px-3 py-2 rounded-lg text-sm
-            bg-[var(--bg)] hover:bg-[var(--hover)]
-            transition flex items-center gap-2
-          "
-        >
-          <FaQrcode />
-          QR
-        </button>
+          <button
+            onClick={() => onQR(shortUrl)}
+            className="
+              flex items-center gap-2
+              px-4 py-2 rounded-xl
+              bg-[var(--bg)] hover:bg-[var(--hover)]
+              text-sm transition
+            "
+          >
+            <FaQrcode />
+            QR
+          </button>
+        </div>
 
+        {/* DELETE (SEPARATED + SAFER VISUAL WEIGHT) */}
         <button
           onClick={() => onDelete(u.id)}
           className="
-            px-3 py-2 rounded-lg text-sm
-            bg-red-500/10 text-red-400
-            hover:bg-red-500/20
-            transition flex items-center gap-2
+            flex items-center gap-2
+            px-3 py-2 rounded-xl
+            text-sm
+            text-red-400
+            hover:bg-red-500/10
+            transition
           "
         >
           <FaTrash />
@@ -125,6 +129,7 @@ export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE, copied })
         </button>
 
       </div>
+
     </div>
   );
 }

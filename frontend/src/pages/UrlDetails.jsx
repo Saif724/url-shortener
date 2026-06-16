@@ -3,15 +3,6 @@ import { useEffect, useState } from "react";
 import { FaArrowLeft, FaCopy, FaLink, FaChartLine } from "react-icons/fa";
 import API_BASE from "../api/api";
 import toast from "react-hot-toast";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid
-} from "recharts";
 
 export default function UrlDetails() {
   const { id } = useParams();
@@ -38,10 +29,10 @@ export default function UrlDetails() {
           : [];
 
         const found = list.find((u) => String(u.id) === String(id));
-
         setUrlData(found);
       } catch (err) {
         console.log(err);
+        toast.error("Failed to load analytics");
       }
     };
 
@@ -75,19 +66,15 @@ export default function UrlDetails() {
 
   const clicks = Number(urlData.clicks) || 0;
 
-  const chartData = Array.from({ length: Math.min(clicks, 10) }, (_, i) => ({
-    name: `T${i + 1}`,
-    clicks: i + 1,
-    }));
-
+  // REALISTIC STATUS (no fake insights)
   const status =
     clicks === 0
       ? "No activity"
       : clicks < 10
-      ? "Early traction"
+      ? "Starting"
       : clicks < 50
       ? "Growing"
-      : "Viral";
+      : "Performing well";
 
   const statusColor =
     clicks === 0
@@ -112,16 +99,16 @@ export default function UrlDetails() {
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--text)] transition"
           >
-            <FaArrowLeft className="text-sm" />
+            <FaArrowLeft />
             <span className="text-sm">Back</span>
           </button>
         </div>
 
-        {/* ANALYTICS GRID */}
+        {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
-            <p className="text-[var(--muted)] text-sm">Clicks</p>
+            <p className="text-[var(--muted)] text-sm">Total Clicks</p>
             <h2 className="text-3xl font-bold mt-2">{clicks}</h2>
           </div>
 
@@ -132,49 +119,31 @@ export default function UrlDetails() {
             </h2>
           </div>
 
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 flex flex-col justify-center">
             <p className="text-[var(--muted)] text-sm">Analytics</p>
             <FaChartLine className="text-2xl mt-3 text-blue-400" />
+            <p className="text-xs text-[var(--muted)] mt-2">
+              Only total clicks are tracked
+            </p>
           </div>
 
         </div>
 
-        <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
-            <p className="text-[var(--muted)] text-sm mb-4">Click Trend</p>
-
-            {clicks === 0 ? (
-                <p className="text-[var(--muted)] text-sm">No data yet</p>
-            ) : (
-                <div className="w-full h-[260px] min-h-[260px]">
-                <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={chartData}>
-                    <XAxis dataKey="name" stroke="currentColor" tick={{fill: "var(--muted)"}} />
-                    <YAxis stroke="currentColor" tick={{fill: "var(--muted)"}} />
-                    <Tooltip 
-                      contentStyle={{
-                        background: "var(--card)",
-                        border: "1px solid var(--border)",
-                        borderRadius: "12px",
-                        color: "var(--text)"
-                      }}
-                    />
-
-                    <CartesianGrid strokeDasharray="3 3" opacity={0.15}/>
-                    <Line
-                        type="monotone"
-                        dataKey="clicks"
-                        stroke="#60A5FA"
-                        strokeWidth={2}
-                    />
-                    </LineChart>
-                </ResponsiveContainer>
-                </div>
-            )}
+        {/* NO FAKE CHART */}
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 text-center">
+          <FaChartLine className="text-3xl mx-auto mb-3 opacity-40" />
+          <p className="text-[var(--text)] font-medium">
+            Click analytics
+          </p>
+          <p className="text-sm text-[var(--muted)] mt-2">
+            Detailed analytics (time, device, location) are not available yet.
+          </p>
         </div>
 
         {/* URL INFO */}
         <div className="space-y-4">
 
+          {/* ORIGINAL URL */}
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
             <div className="flex justify-between items-center">
               <p className="text-[var(--muted)] text-sm">Original URL</p>
@@ -188,6 +157,7 @@ export default function UrlDetails() {
             <p className="break-words mt-2">{urlData.url}</p>
           </div>
 
+          {/* SHORT URL */}
           <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
             <div className="flex justify-between items-center">
               <p className="text-[var(--muted)] text-sm">Short URL</p>
@@ -213,7 +183,6 @@ export default function UrlDetails() {
           </div>
 
         </div>
-
       </div>
     </div>
   );
