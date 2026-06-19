@@ -1,44 +1,40 @@
 import { useState, useEffect, useCallback } from "react";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import API_BASE from "../api/api";
 import toast from "react-hot-toast";
+
 import StatsCards from "../components/StatsCards";
 import UrlInput from "../components/UrlInput";
-import Header from "../components/Header";
 import UrlList from "../components/UrlList";
-import DeleteModal from "../components/DeleteModal";
-import QRModal from "../components/QRModal";
 import SearchBar from "../components/SearchBar";
 
-export default function Dashboard({theme, setTheme}) {
+import QRModal from "../components/QRModal";
+import DeleteModal from "../components/DeleteModal";
+import { FaArrowRight } from "react-icons/fa";
+
+export default function Dashboard() {
   const [urls, setUrls] = useState([]);
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+
+  const [copiedId, setCopiedId] = useState(null);
+
+  // MODALS
   const [showQR, setShowQR] = useState(false);
   const [qrValue, setQrValue] = useState("");
-  const [search, setSearch] = useState("");
-  const [viewMode, setViewMode] = useState("list");
-  const [copiedId, setCopiedId] = useState(null);
-  const [sortBy, setSortBy] = useState("newest");
+
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   const navigate = useNavigate();
 
-  const getToken = useCallback(() => localStorage.getItem("token"),[]);
+  const getToken = useCallback(() => localStorage.getItem("token"), []);
 
-  const openQR = (shortUrl) => {
-    setQrValue(shortUrl);
-    setShowQR(true);
-  };
-
-  const openDeleteModal = (id) => {
-    setSelectedId(id);
-    setShowDeleteModal(true);
-  }
-
+  // FETCH URLS
   const fetchUrls = useCallback(async () => {
     try {
       setLoading(true);
+
       const res = await fetch(`${API_BASE}/user/urls`, {
         headers: {
           Authorization: `Bearer ${getToken()}`,
@@ -47,28 +43,29 @@ export default function Dashboard({theme, setTheme}) {
 
       const data = await res.json();
 
-      if (Array.isArray(data.data)){
-        setUrls(data.data);
-      } else if (Array.isArray(data)){
-        setUrls(data);
-      } else {
-        setUrls([]);
-      }
-    } catch (err) {
-      console.log(err);
+      const list = Array.isArray(data.data)
+        ? data.data
+        : Array.isArray(data)
+        ? data
+        : [];
+
+      setUrls(list);
+    } catch {
       toast.error("Failed to load URLs");
     } finally {
       setLoading(false);
     }
   }, [getToken]);
 
+  useEffect(() => {
+    fetchUrls();
+    const onFocus = () => fetchUrls();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [fetchUrls]);
+
+  // SHORTEN URL
   const shorten = async (url) => {
-    if (!url) {
-      toast.error("Please enter a URL", {
-        id: "empty-url"
-      });
-      return;
-    }
 
     try {
       const res = await fetch(`${API_BASE}/shorten`, {
@@ -82,224 +79,147 @@ export default function Dashboard({theme, setTheme}) {
 
       const data = await res.json();
 
-      if (res.ok) {
-        toast.success("Shortened!");
-        await fetchUrls();
-      } else {
-          toast.error(data.error || "Failed to shorten", {
-            id: data.error || "failed-to-shorten", 
-          });
+      if (!res.ok) {
+        toast.error(data?.error || "Failed to shorten URL");
+        return;
       }
-    } catch(err) {
-      console.log(err);
-      toast.error("Server error", {
-        id: "server-error",
-      });
+
+      toast.success("Shortened successfully!");
+      fetchUrls();
+
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error. Try again later.");
     }
   };
 
+  // COPY
   const copyLink = async (shortUrl, id) => {
     await navigator.clipboard.writeText(shortUrl);
     setCopiedId(id);
-
     setTimeout(() => setCopiedId(null), 1000);
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    navigate("/");
+  // QR
+  const openQR = (shortUrl) => {
+    setQrValue(shortUrl);
+    setShowQR(true);
   };
 
-  useEffect(() => {
-    fetchUrls();
+  // DELETE
+  const openDelete = (id) => {
+    setDeleteId(id);
+    setShowDelete(true);
+  };
 
-    const onFocus = () => fetchUrls();
-    window.addEventListener("focus", onFocus);
-
-    return () => window.removeEventListener("focus", onFocus);
-  }, [fetchUrls]);
-
-  const deleteUrl = async (id) => {
+  const confirmDelete = async () => {
     try {
-      const res = await fetch(`${API_BASE}/user/urls/${id}`,{
+      const res = await fetch(`${API_BASE}/user/urls/${deleteId}`, {
         method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${getToken()}`,
-          },
-        });
-
-      const data = await res.json();
-
-      
-      if (res.ok) {
-        toast.success("URL deleted");
-        await fetchUrls();
-      } else {
-        toast.error(data.error || "Delete failed",{
-          id: data.error || "delete-failed",
-        });
-      }
-    }catch (err) {
-      console.log(err);
-      toast.error("Server error", {
-        id: "server-error",
+        headers: {
+          Authorization: `Bearer ${getToken()}`,
+        },
       });
+
+      if (res.ok) {
+        toast.success("Deleted!");
+        fetchUrls();
+      }
+    } catch {
+      toast.error("Delete failed");
+    } finally {
+      setShowDelete(false);
+      setDeleteId(null);
     }
   };
 
-    
-  const confirmDelete = async () => {
-    if (!selectedId) return;
-
-    await deleteUrl(selectedId);
-
-    setSelectedId(null);
-    setShowDeleteModal(false);
-  };
-
-  const filteredUrls = urls
+  // FILTER
+  const recent = urls
     .filter((u) =>
       u.url.toLowerCase().includes(search.toLowerCase())
     )
-    .sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return new Date(b.created_at) - new Date(a.created_at);
-
-        case "oldest":
-          return new Date(a.created_at) - new Date(b.created_at);
-
-        case "clicks_high":
-          return Number(b.clicks) - Number(a.clicks);
-
-        case "clicks_low":
-          return Number(a.clicks) - Number(b.clicks);
-
-        default:
-          return new Date(b.created_at) - new Date(a.created_at);
-      }
-    });
+    .slice(0, 4);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[var(--bg)] text-[var(--text)] px-4 py-8">
-      <div className="absolute top-[-100px] left-[-100px] w-[300px] h-[300px] bg-purple-500 opacity-30 blur-[120px] rounded-full"></div>
-      <div className="absolute bottom-[-100px] right-[-100px] w-[300px] h-[300px] bg-blue-500 opacity-30 blur-[120px] rounded-full"></div>
-      <div className="max-w-5xl mx-auto space-y-10">
-        <Header onLogout={logout} theme={theme} setTheme={setTheme} />
+    <div className="space-y-10">
 
-        <div className="h-px bg-white/10 my-4"/>
-        
-        <div className="space-y-6">
+      {/* ================= OVERVIEW ================= */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
+            Overview
+          </p>
+        </div>
+
+        <StatsCards urls={urls} />
+      </div>
+
+      {/* ================= CREATE & SEARCH ================= */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
+          <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
+            Create & Search
+          </p>
+        </div>
+
+        <UrlInput onShorten={shorten} />
+        <SearchBar search={search} setSearch={setSearch} />
+      </div>
+
+      {/* ================= RECENT LINKS ================= */}
+      <div className="space-y-4">
+
+        <div className="flex justify-between items-center">
+
           <div className="flex items-center gap-2">
             <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
             <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
-              Overview
-            </p>
-          </div>
-          <StatsCards urls={urls} />
-        </div>
-
-        <div className="border-t border-[var(--border)] opacity-50" />
-
-        <div className="space-y-6">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
-              Create & Search
-            </p>
-          </div>
-          <UrlInput onShorten={shorten} />
-
-          <SearchBar
-            search={search}
-            setSearch={setSearch}
-          />
-        </div>
-
-        <div className="border-t border-[var(--border)] opacity-50" />
-
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-
-            <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-400" />
-            <p className="text-xs uppercase tracking-wider text-[var(--muted)]">
-              Your Links
+              Recent Links
             </p>
           </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => setViewMode("list")}
-                className={`
-                  px-3 py-1.5 rounded-lg text-xs border transition font-medium
-
-                  ${
-                    viewMode === "list"
-                      ? "bg-blue-500/20 text-blue-300 border-blue-400/30"
-                      : "bg-[var(--card)] text-[var(--muted)] border-[var(--border)] hover:text-[var(--text)] hover:bg-[var(--hover)]"
-                  }
-                `}
-              >
-                List
-              </button>
-
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`
-                  px-3 py-1.5 rounded-lg text-xs border transition font-medium
-
-                  ${
-                    viewMode === "grid"
-                      ? "bg-blue-500/20 text-blue-300 border-blue-400/30"
-                      : "bg-[var(--card)] text-[var(--muted)] border-[var(--border)] hover:text-[var(--text)] hover:bg-[var(--hover)]"
-                  }
-                `}
-              >
-                Grid
-              </button>
-            </div>
-
-          </div>
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value)}
-            className="bg-[var(--bg)] border border-[var(--border)] px-3 py-2 rounded-lg text-sm"
+          <button
+            onClick={() => navigate("/links")}
+            className="flex items-center gap-2
+            text-blue-400 hover:text-blue-300
+            text-sm font-medium
+            transition"
           >
-            <option value="newest">Newest</option>
-            <option value="oldest">Oldest</option>
-            <option value="clicks_high">Most Clicked</option>
-            <option value="clicks_low">Least Clicked</option>
-          </select>
-          <UrlList
-            urls={urls}
-            filteredUrls={filteredUrls}
-            loading={loading}
-            onCopy={copyLink}
-            copiedId={copiedId}
-            onDelete={openDeleteModal}
-            onQR={openQR}
-            API_BASE={API_BASE}
-            viewMode={viewMode}
-          />
+            View All
+            <FaArrowRight />
+          </button>
+
         </div>
 
-        <DeleteModal
-          show={showDeleteModal}
-          onClose={()=>{
-            setShowDeleteModal(false);
-            setSelectedId(null);
-          }}
-          onConfirm={confirmDelete}
-        />
-
-        <QRModal
-          show={showQR}
-          value={qrValue}
-          onClose={()=>setShowQR(false)}
+        <UrlList
+          urls={recent}
+          filteredUrls={recent}
+          loading={loading}
+          onCopy={copyLink}
+          copiedId={copiedId}
+          onQR={openQR}
+          onDelete={openDelete}
+          API_BASE={API_BASE}
+          viewMode="list"
         />
 
       </div>
+
+      {/* ================= MODALS ================= */}
+      <QRModal
+        show={showQR}
+        value={qrValue}
+        onClose={() => setShowQR(false)}
+      />
+
+      <DeleteModal
+        show={showDelete}
+        onClose={() => setShowDelete(false)}
+        onConfirm={confirmDelete}
+      />
+
     </div>
   );
 }

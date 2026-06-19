@@ -1,10 +1,14 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
+
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import UrlDetails from "./pages/UrlDetails";
+import Links from "./pages/Links";
+
+import Layout from "./components/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import { useState, useEffect } from "react";
 
 function App() {
   const [theme, setTheme] = useState(
@@ -16,24 +20,36 @@ function App() {
     document.documentElement.classList.add(theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
+
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login/>} />
-        <Route path="/register" element={<Register/>} />
-        <Route 
-          path="/dashboard" element={
+
+        {/* PUBLIC */}
+        <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
+        {/* PROTECTED APP SHELL */}
+        <Route
+          element={
             <ProtectedRoute>
-              <Dashboard theme={theme} setTheme={setTheme} />
-              </ProtectedRoute>
-          } 
-         />
+              <Layout theme={theme} setTheme={setTheme} />
+            </ProtectedRoute>
+          }
+        >
 
+          <Route path="/dashboard" element={<Dashboard />} />
 
-        <Route path="/url/:id" element={<UrlDetails/>} />
+          {/* FULL LINKS PAGE (IMPORTANT) */}
+          <Route path="/links" element={<Links />} />
+
+          <Route path="/url/:id" element={<UrlDetails />} />
+
+        </Route>
+
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
 
 export default App;

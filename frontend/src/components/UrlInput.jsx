@@ -21,7 +21,7 @@ export default function UrlInput({ onShorten }) {
     <div
       className="
         bg-[var(--card)] border border-[var(--border)]
-        rounded-2xl p-2
+        rounded-2xl p-3
         flex flex-col sm:flex-row gap-3
         items-stretch
         hover:bg-white/10 transition
@@ -29,7 +29,7 @@ export default function UrlInput({ onShorten }) {
     >
 
       {/* INPUT SECTION */}
-      <div className="flex items-center gap-3 flex-1">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
 
         <FaLink className="text-gray-400 text-sm shrink-0" />
 
@@ -45,6 +45,7 @@ export default function UrlInput({ onShorten }) {
             outline-none text-[var(--text)]
             placeholder-[var(--muted)]
             text-sm sm:text-base
+            min-w-0
           "
         />
       </div>
@@ -54,9 +55,12 @@ export default function UrlInput({ onShorten }) {
         onClick={handleSubmit}
         disabled={loading || !url.trim()}
         className={`
-          px-5 py-3 rounded-xl font-medium
+          w-full sm:w-auto
+          px-4 sm:px-5
+          py-2 sm:py-3
+          rounded-xl font-medium
           flex items-center justify-center gap-2
-          transition
+          transition text-sm sm:text-base
 
           ${
             loading || !url.trim()
@@ -74,6 +78,7 @@ export default function UrlInput({ onShorten }) {
           "Shorten URL"
         )}
       </button>
+
     </div>
   );
 }
