@@ -100,7 +100,7 @@ func main() {
 	rateLimiter := middleware.RateLimiter(10, 1)
 
 	corsMiddleware := middleware.CORS([]string{
-		"https://shorty-lyart.vercel.app/",
+		"https://shorty-lyart.vercel.app",
 	})
 
 	mux := http.NewServeMux()
