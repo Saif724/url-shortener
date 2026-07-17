@@ -43,7 +43,7 @@ export default function Register() {
 
             if (res.ok) {
                 toast.success("Account created");
-                navigate("/");
+                navigate("/login");
             } else {
                 toast.error(data.error || "Register failed", {
                     id: data.error || "register-failed",
@@ -148,7 +148,7 @@ export default function Register() {
                 </p>
 
                 <button
-                    onClick={() => navigate("/")}
+                    onClick={() => navigate("/login")}
                     className="mt-3 w-full border border-[var(--border)] p-3 rounded-xl text-[var(--text)] hover:bg-white/10 transition"
                 >
                     Login

@@ -13,7 +13,7 @@ export default function Layout({ theme, setTheme }) {
 
   const logout = () => {
     localStorage.removeItem("token");
-    navigate("/");
+    navigate("/login");
   };
 
   return (
@@ -27,7 +27,7 @@ export default function Layout({ theme, setTheme }) {
             <div className="flex items-center gap-4 sm:gap-6">
 
             <h1 className="font-bold text-sm sm:text-base">
-                URL Shortener
+                Shorty
             </h1>
 
             <nav className="flex items-center gap-3 sm:gap-5 text-sm">

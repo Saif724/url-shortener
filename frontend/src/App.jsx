@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import UrlDetails from "./pages/UrlDetails";
 import Links from "./pages/Links";
+import Home from "./pages/Home";
 
 import Layout from "./components/Layout";
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -26,7 +27,8 @@ function App() {
       <Routes>
 
         {/* PUBLIC */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
         {/* PROTECTED APP SHELL */}
