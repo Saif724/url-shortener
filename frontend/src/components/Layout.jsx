@@ -13,7 +13,7 @@ export default function Layout({ theme, setTheme }) {
 
   const logout = () => {
     localStorage.removeItem("token");
-    navigate("/login");
+    navigate("/");
   };
 
   return (
