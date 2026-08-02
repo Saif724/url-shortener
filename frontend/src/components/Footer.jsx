@@ -1,155 +1,112 @@
-import { Link } from "react-router-dom";
-import { FaCopyright } from "react-icons/fa";
+import {
+  FaCopyright,
+  FaGithub,
+  FaBookOpen,
+  FaEnvelope,
+} from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-[var(--border)] mt-24">
-
+    <footer className="mt-24 border-t border-[var(--border)]">
       <div className="max-w-6xl mx-auto px-4 py-14">
 
-        <div className="grid gap-10 md:grid-cols-4">
+        {/* Brand */}
+        <div className="flex flex-col items-center text-center">
 
-          {/* Brand */}
+          <img
+            src="/logo.png"
+            alt="Shorty"
+            className="w-12 h-12"
+          />
 
-          <div>
+          <h2 className="mt-4 text-3xl font-bold">
+            Shorty
+          </h2>
 
-            <div className="flex items-center gap-3">
+          <p className="mt-3 max-w-md text-[var(--muted)] leading-7">
+            A modern URL Shortener & Link Management platform
+            built with Go, React, PostgreSQL and Redis.
+          </p>
 
-              <img
-                src="/logo.png"
-                alt="Shorty"
-                className="w-9 h-9"
-              />
+        </div>
 
-              <h3 className="text-2xl font-bold">
-                Shorty
-              </h3>
+        {/* Links */}
 
-            </div>
+        <div className="mt-10 flex flex-wrap justify-center gap-8">
 
-            <p className="mt-4 text-[var(--muted)] leading-7">
-              A modern URL shortener built with Go, React,
-              PostgreSQL and Redis.
-            </p>
+          <a
+            href="https://github.com/Saif724/url-shortener"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--accent)] transition"
+          >
+            <FaGithub />
+            GitHub
+          </a>
 
-          </div>
+          <a
+            href="https://shorty-offu.onrender.com/docs"
+            target="_blank"
+            rel="noreferrer"
+            className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--accent)] transition"
+          >
+            <FaBookOpen />
+            API Docs
+          </a>
 
-          {/* Navigation */}
+          <a
+            href="mailto:your@email.com"
+            className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--accent)] transition"
+          >
+            <FaEnvelope />
+            Contact
+          </a>
 
-          <div>
+        </div>
 
-            <h4 className="font-semibold mb-4">
-              Navigation
-            </h4>
+        {/* Tech Stack */}
 
-            <div className="space-y-3">
+        <div className="mt-10 flex flex-wrap justify-center gap-3">
 
-              <a href="#home" className="block hover:text-[var(--accent)] transition">
-                Home
-              </a>
-
-              <a href="#features" className="block hover:text-[var(--accent)] transition">
-                Features
-              </a>
-
-              <a href="#how-it-works" className="block hover:text-[var(--accent)] transition">
-                How it Works
-              </a>
-
-            </div>
-
-          </div>
-
-          {/* Account */}
-
-          <div>
-
-            <h4 className="font-semibold mb-4">
-              Account
-            </h4>
-
-            <div className="space-y-3">
-
-              <Link
-                to="/login"
-                className="block hover:text-[var(--accent)] transition"
-              >
-                Sign In
-              </Link>
-
-              <Link
-                to="/register"
-                className="block hover:text-[var(--accent)] transition"
-              >
-                Create Account
-              </Link>
-
-            </div>
-
-          </div>
-
-          {/* Resources */}
-
-          <div>
-
-            <h4 className="font-semibold mb-4">
-              Resources
-            </h4>
-
-            <div className="space-y-3">
-
-              <a
-                href="https://shorty-offu.onrender.com/docs"
-                target="_blank"
-                rel="noreferrer"
-                className="block hover:text-[var(--accent)] transition"
-              >
-                API Documentation
-              </a>
-
-              <a
-                href="https://github.com/Saif724/url-shortener"
-                target="_blank"
-                rel="noreferrer"
-                className="block hover:text-[var(--accent)] transition"
-              >
-                GitHub Repository
-              </a>
-
-            </div>
-
-          </div>
+          {[
+            "Go",
+            "React",
+            "PostgreSQL",
+            "Redis",
+            "Docker",
+          ].map((tech) => (
+            <span
+              key={tech}
+              className="
+                rounded-full
+                border
+                border-[var(--border)]
+                px-4
+                py-2
+                text-sm
+                bg-[var(--card)]
+              "
+            >
+              {tech}
+            </span>
+          ))}
 
         </div>
 
         {/* Bottom */}
 
-        <div
-          className="
-            mt-12
-            pt-8
-            border-t
-            border-[var(--border)]
-            flex
-            flex-col
-            items-center
-            gap-3
-            text-center
-          "
-        >
-          <p className="text-sm text-[var(--muted)]">
-            Built with Go, React, PostgreSQL, Redis and Docker.
-          </p>
+        <div className="mt-12 pt-8 border-t border-[var(--border)] text-center">
 
           <p className="flex items-center justify-center gap-2 text-sm text-[var(--muted)]">
             <FaCopyright className="text-xs" />
-            <span>2026 Shorty. Designed & Developed by Ahsan Ahmed Saif.</span>
+            <span>
+              2026 Shorty. Designed & Developed by Ahsan Ahmed Saif.
+            </span>
           </p>
 
         </div>
 
       </div>
-
     </footer>
   );
 }
