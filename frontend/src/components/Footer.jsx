@@ -99,7 +99,7 @@ export default function Footer() {
 
           <p className="flex items-center justify-center gap-2 text-sm text-[var(--muted)] flex-wrap">
             <FaCopyright className="text-xs shrink-0" />
-            <span className="break-words">
+            <span>
               2026 Shorty. Designed & Developed by Ahsan Ahmed Saif.
             </span>
           </p>
