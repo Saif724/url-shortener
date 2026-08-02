@@ -97,9 +97,9 @@ export default function Footer() {
 
         <div className="mt-12 pt-8 border-t border-[var(--border)] text-center">
 
-          <p className="inline-flex items-center justify-center gap-2 text-sm text-[var(--muted)] flex-wrap">
+          <p className="flex items-center justify-center gap-2 text-sm text-[var(--muted)] flex-wrap">
             <FaCopyright className="text-xs shrink-0" />
-            <span className="whitespace-nowrap">
+            <span className="break-words">
               2026 Shorty. Designed & Developed by Ahsan Ahmed Saif.
             </span>
           </p>
