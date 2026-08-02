@@ -1,152 +1,151 @@
-openapi: 3.0.0
+openapi: 3.0.3
+
 info:
-  title: URL Shortener API
-  description: A simple URL shortening service with caching and rate limiting
-  version: 1.0.0
+  title: Shorty API
+  version: "1.0.0"
+  description: |
+    Shorty is a modern URL Shortener and Link Management Platform.
+
+    ## Features
+
+    - JWT Authentication
+    - URL Shortening
+    - Link Management
+    - Click Analytics
+    - Redis Caching
+    - Rate Limiting
+    - RESTful API
+
+    Built with Go, PostgreSQL, Redis and React.
+
+    This API powers the Shorty web application and provides secure URL shortening,
+    redirect handling, authentication and link management.
+
   contact:
-    name: API Support
+    name: Ahsan Ahmed Saif
+    url: https://github.com/Saif724
+
+externalDocs:
+  description: GitHub Repository
+  url: https://github.com/Saif724/url-shortener
 
 servers:
+  - url: https://shorty-offu.onrender.com
+    description: Production Server
+
   - url: http://localhost:8080
-    description: Local development server
+    description: Local Development
 
 tags:
-  - name: URL
-    description: URL shortening operations
-  - name: Auth
-    description: Authentication operations
+  - name: Authentication
+    description: User registration and authentication.
+
+  - name: URLs
+    description: URL shortening and management operations.
 
 paths:
+
   /register:
     post:
-      summary: Register new user
-      description: Create a new user account
+      summary: Register a new user
+      description: Creates a new user account.
       tags:
-        - Auth
+        - Authentication
+
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  example: newuser@example.com
-                password:
-                  type: string
-                  example: password123
+              $ref: '#/components/schemas/AuthRequest'
+
       responses:
         '201':
-          description: User registered
+          description: User registered successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  user_id:
-                    type: string
+                $ref: '#/components/schemas/RegisterResponse'
+
         '400':
-          description: Invalid email or password already exists
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   /login:
     post:
-      summary: User login
-      description: Authenticate user and receive JWT token
+      summary: Login
+      description: Authenticate a user and receive a JWT token.
       tags:
-        - Auth
+        - Authentication
+
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  example: test@example.com
-                password:
-                  type: string
-                  example: password123
+              $ref: '#/components/schemas/AuthRequest'
+
       responses:
         '200':
           description: Login successful
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                  token:
-                    type: string
-                  user_id:
-                    type: string
+                $ref: '#/components/schemas/LoginResponse'
+
         '401':
-          description: Invalid credentials
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /shorten:
     post:
       summary: Create a shortened URL
-      description: Takes a long URL and returns a short ID. If URL already exists, returns existing ID.
-      security:
-        - bearerAuth: []
+      description: Create a short URL from a long URL.
       operationId: shortenURL
+
+      security:
+        - BearerAuth: []
+
       tags:
-        - URL
+        - URLs
+
       requestBody:
         required: true
-        description: The URL to shorten
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                url:
-                  type: string
-                  format: uri
-                  description: The long URL to shorten
-                  example: https://www.google.com/search?q=golang
-              required:
-                - url
+              $ref: '#/components/schemas/ShortenRequest'
+
       responses:
         '201':
           description: URL shortened successfully
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  success:
-                    type: boolean
-                    example: true
-                  data:
-                    type: object
-                    properties:
-                      short_url:
-                        type: string
-                        description: The shortened URL
-                        example: http://localhost:8080/r/YjMjspge
-                    required:
-                      - short_url
-                required:
-                  - success
-                  - data
+                $ref: '#/components/schemas/ShortenResponse'
+
         '400':
-          description: Bad request - invalid or missing URL
+          description: Invalid request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
         '429':
-          description: Too many requests - rate limit exceeded
+          description: Rate limit exceeded
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
         '500':
-          description: Internal server error
+          description: Internal Server Error
           content:
             application/json:
               schema:
@@ -155,78 +154,289 @@ paths:
   /r/{id}:
     get:
       summary: Resolve a shortened URL
-      description: Redirects to the original long URL. Uses Redis caching for fast lookups.
+      description: Redirects to the original URL. Uses Redis caching for faster lookups.
       operationId: resolveURL
+
       tags:
-        - URL
+        - URLs
+
       parameters:
         - name: id
           in: path
           required: true
-          description: The short URL ID
+          description: Short URL identifier.
           schema:
             type: string
             example: YjMjspge
+
       responses:
         '302':
-          description: Redirect to original URL
+          description: Redirect to the original URL
           headers:
             Location:
-              description: The original long URL
+              description: Original URL
               schema:
                 type: string
                 example: https://www.google.com/search?q=golang
+
         '404':
           description: Short URL not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
         '429':
-          description: Too many requests - rate limit exceeded
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/urls:
+    get:
+      summary: Get all URLs
+      description: Returns every shortened URL created by the authenticated user.
+
+      security:
+        - BearerAuth: []
+
+      tags:
+        - URLs
+
+      responses:
+        '200':
+          description: User URLs returned successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/URL'
+
+                required:
+                  - success
+                  - data
+
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /user/urls/{id}:
+    delete:
+      summary: Delete a shortened URL
+      description: Deletes one of the authenticated user's shortened URLs.
+
+      security:
+        - BearerAuth: []
+
+      tags:
+        - URLs
+
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Short URL identifier.
+          schema:
+            type: string
+            example: YjMjspge
+
+      responses:
+        '200':
+          description: URL deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+
+                  message:
+                    type: string
+                    example: URL deleted successfully
+
+                required:
+                  - success
+                  - message
+
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+        '404':
+          description: URL not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
 components:
+
   securitySchemes:
-    bearerAuth:
+    BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
-      description: JWT token in Authorization header
+      description: JWT token sent in the Authorization header.
   schemas:
-    ErrorResponse:
+
+    AuthRequest:
       type: object
+      required:
+        - email
+        - password
+
+      properties:
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+
+        password:
+          type: string
+          format: password
+          example: password123
+
+    ShortenRequest:
+      type: object
+      required:
+        - url
+
+      properties:
+        url:
+          type: string
+          format: uri
+          description: Original URL to shorten
+          example: https://github.com/Saif724
+
+    RegisterResponse:
+      type: object
+
       properties:
         success:
           type: boolean
-          example: false
-        error:
-          type: string
-          description: Error message
-          example: Invalid URL
+          example: true
+
+        data:
+          type: object
+          properties:
+            user_id:
+              type: string
+              example: "1"
+
+          required:
+            - user_id
+
       required:
-        - error
+        - success
+        - data
+
+    LoginResponse:
+      type: object
+
+      properties:
+        success:
+          type: boolean
+          example: true
+
+        data:
+          type: object
+
+          properties:
+            token:
+              type: string
+              description: JWT access token
+              example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+            user_id:
+              type: string
+              example: "1"
+
+          required:
+            - token
+            - user_id
+
+      required:
+        - success
+        - data
+
+    ShortenResponse:
+      type: object
+
+      properties:
+        success:
+          type: boolean
+          example: true
+
+        data:
+          type: object
+
+          properties:
+            short_url:
+              type: string
+              description: Generated shortened URL
+              example: https://shorty-offu.onrender.com/r/YjMjspge
+
+          required:
+            - short_url
+
+      required:
+        - success
+        - data
 
     URL:
       type: object
+
       properties:
         id:
           type: string
-          description: Short URL ID
+          description: Short URL identifier
           example: YjMjspge
+
         url:
           type: string
-          description: Original long URL
-          example: https://www.google.com
+          format: uri
+          description: Original URL
+          example: https://github.com/Saif724
+
         created_at:
           type: string
           format: date-time
-          description: When the short URL was created
-          example: 2026-05-09T15:06:12Z
+          example: "2026-07-17T18:30:15Z"
+
       required:
         - id
         - url
         - created_at
+
+    ErrorResponse:
+      type: object
+
+      properties:
+        success:
+          type: boolean
+          example: false
+
+        error:
+          type: string
+          example: Invalid URL
+
+      required:
+        - success
+        - error

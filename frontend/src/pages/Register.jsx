@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import {
+  FaEye,
+  FaEyeSlash,
+  FaArrowLeft,
+} from "react-icons/fa";
 import API_BASE from "../api/api";
 import toast from "react-hot-toast";
 
@@ -42,8 +46,11 @@ export default function Register() {
             const data = await res.json();
 
             if (res.ok) {
-                toast.success("Account created");
-                navigate("/login");
+                toast.success("Account created successfully!");
+
+                setTimeout(() => {
+                    navigate("/login");
+                }, 800);
             } else {
                 toast.error(data.error || "Register failed", {
                     id: data.error || "register-failed",
@@ -62,22 +69,69 @@ export default function Register() {
         <div className="min-h-screen relative overflow-hidden bg-[var(--bg)] flex items-center justify-center px-4">
 
             {/* background glow */}
-            <div className="absolute top-[-120px] left-[-120px] w-80 h-80 bg-purple-500 opacity-20 blur-[120px] rounded-full"></div>
-            <div className="absolute bottom-[-120px] right-[-120px] w-80 h-80 bg-blue-500 opacity-20 blur-[120px] rounded-full"></div>
-
+            <div className="absolute -top-32 -left-32 w-80 h-80 bg-[var(--accent)] opacity-10 blur-[120px] rounded-full" />
+            <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-[var(--accent)] opacity-10 blur-[120px] rounded-full" />
+            
             {/* card */}
-            <div className="relative z-10 w-full max-w-md bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 shadow-2xl">
+            <div
+            className="
+                relative
+                z-10
+                w-full
+                max-w-md
+                rounded-3xl
+                border
+                border-[var(--border)]
+                bg-[var(--card)]
+                backdrop-blur-xl
+                shadow-xl
+                p-8
+            "
+            >
+                <div className="flex justify-start">
+                    <button
+                        onClick={() => navigate("/")}
+                        className="
+                        inline-flex
+                        items-center
+                        gap-2
+                        px-3
+                        py-2
+                        rounded-lg
+                        text-sm
+                        font-medium
+                        text-[var(--muted)]
+                        hover:bg-[var(--hover)]
+                        hover:text-[var(--text)]
+                        transition-all
+                        "
+                    >
+                        <FaArrowLeft className="text-xs" />
+                        Back
+                    </button>
+                </div>
 
-                <h1 className="text-4xl font-bold text-[var(--text)] text-center">
-                    Create Account
+                <img
+                src="/logo.png"
+                alt="Shorty"
+                className="w-10 h-10 mx-auto mt-5 mb-4 select-none"
+                />
+
+                <h1 className="text-3xl font-bold text-center">
+                Create Account
                 </h1>
 
-                <p className="text-[var(--muted)] text-center mt-2">
-                    Join and start shortening URLs
+                <p className="mt-2 text-center text-[var(--muted)] leading-6">
+                Start shortening and managing your links today.
                 </p>
 
-                <div className="mt-8 space-y-4">
-
+                <form
+                className="mt-8 space-y-4"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    handleRegister();
+                }}
+                >
                     {/* EMAIL */}
                     <input
                         type="email"
@@ -91,10 +145,8 @@ export default function Register() {
                                 setErrors((prev) => ({ ...prev, email: "" }));
                             }
                         }}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter") handleRegister();
-                        }}
-                        className="w-full bg-transparent border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text)] placeholder-[var(--muted)] outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        
+                        className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 text-[var(--text)] placeholder-[var(--muted)] outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)] transition-all"
                     />
 
                     {errors.email && (
@@ -114,45 +166,75 @@ export default function Register() {
                                     setErrors((prev) => ({ ...prev, password: "" }));
                                 }
                             }}
-                            onKeyDown={(e) => {
-                                if (e.key === "Enter") handleRegister();
-                            }}
-                            className="w-full bg-transparent border border-[var(--border)] rounded-xl px-4 py-3 pr-10 text-[var(--text)] placeholder-[var(--muted)] outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                            
+                            className="w-full bg-[var(--bg)] border border-[var(--border)] rounded-xl px-4 py-3 pr-10 text-[var(--text)] placeholder-[var(--muted)] outline-none focus:border-[var(--accent)] focus:ring-2 focus:ring-[var(--accent)] transition-all"
                         />
 
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--muted)] hover:bg-white/10 p-1 rounded-md transition"
+                            className="
+                                absolute
+                                right-3
+                                top-1/2
+                                -translate-y-1/2
+                                p-1
+                                rounded-md
+                                text-[var(--muted)]
+                                hover:bg-[var(--hover)]
+                                hover:text-[var(--text)]
+                                transition
+                            "
                         >
                             {showPassword ? <FaEyeSlash /> : <FaEye />}
                         </button>
                     </div>
 
                     {errors.password && (
-                        <p className="text-sm text-red-400">{errors.password}</p>
+                        <p className="text-sm text-red-500">{errors.password}</p>
                     )}
 
                     {/* BUTTON */}
                     <button
-                        onClick={handleRegister}
+                        type="submit"
                         disabled={loading}
-                        className="w-full py-3 rounded-xl font-semibold bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:opacity-90 transition disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="
+                        w-full
+                        py-3
+                        rounded-xl
+                        font-semibold
+                        bg-[var(--accent)]
+                        text-white
+                        hover:opacity-90
+                        transition
+                        disabled:opacity-60
+                        disabled:cursor-not-allowed
+                        "
                     >
-                        {loading ? "Creating account..." : "Create Account"}
+                        {loading ? "Creating Account..." : "Create Account"}
                     </button>
+                </form>
+
+                <div className="mt-8 text-center">
+
+                    <p className="text-[var(--muted)]">
+                        Already have an account?
+                    </p>
+
+                    <button
+                        onClick={() => navigate("/login")}
+                        className="
+                        mt-3
+                        font-semibold
+                        text-[var(--accent)]
+                        hover:underline
+                        transition
+                        "
+                    >
+                        Sign In
+                    </button>
+
                 </div>
-
-                <p className="text-center text-[var(--muted)] mt-6">
-                    Already have an account?
-                </p>
-
-                <button
-                    onClick={() => navigate("/login")}
-                    className="mt-3 w-full border border-[var(--border)] p-3 rounded-xl text-[var(--text)] hover:bg-white/10 transition"
-                >
-                    Login
-                </button>
             </div>
         </div>
     );

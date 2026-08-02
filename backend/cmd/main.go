@@ -21,50 +21,137 @@ import (
 
 func serveSwaggerUI() string {
 	return `<!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-	<title>URL Shortener API Documentation</title>
-	<meta charset="utf-8"/>
+	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css">
+
+	<title>Shorty API Documentation</title>
+
+	<link rel="icon" type="image/png" href="/logo.png">
+
+	<link
+		rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui.min.css"
+	/>
+
 	<style>
 		html {
 			box-sizing: border-box;
-			overflow: -moz-scrollbars-vertical;
 			overflow-y: scroll;
+			background: #f8fafc;
 		}
-		*, *:before, *:after {
+
+		*,
+		*:before,
+		*:after {
 			box-sizing: inherit;
 		}
+
 		body {
 			margin: 0;
 			padding: 0;
-			background: #fafafa;
+			background: #f8fafc;
+			font-family: Inter, Arial, sans-serif;
+		}
+
+		.topbar {
+			background: #2563eb !important;
+			padding: 12px 0;
+		}
+
+		.swagger-ui .topbar-wrapper img {
+			display: none;
+		}
+
+		.swagger-ui .topbar-wrapper::before {
+			content: "🚀 Shorty API";
+			color: white;
+			font-size: 22px;
+			font-weight: 700;
+		}
+
+		.swagger-ui .info {
+			margin: 30px 0;
+		}
+
+		.swagger-ui .info hgroup.main h2 {
+			font-size: 34px;
+		}
+
+		.swagger-ui .scheme-container {
+			border-radius: 12px;
+			box-shadow: 0 8px 30px rgba(0,0,0,.08);
+		}
+
+		.swagger-ui .opblock {
+			border-radius: 10px;
+			overflow: hidden;
+		}
+
+		.swagger-ui .btn.authorize {
+			border-radius: 8px;
+		}
+
+		.swagger-ui .download-url-wrapper {
+			display: none;
 		}
 	</style>
 </head>
+
 <body>
-	<div id="swagger-ui"></div>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js"></script>
-	<script>
-		window.onload = function() {
-			const ui = SwaggerUIBundle({
-				url: window.location.origin + "/openapi.yaml",
-				dom_id: '#swagger-ui',
-				deepLinking: true,
-				presets: [
-					SwaggerUIBundle.presets.apis,
-					SwaggerUIStandalonePreset
-				],
-				plugins: [
-					SwaggerUIBundle.plugins.DownloadUrl
-				],
-				layout: "StandaloneLayout"
-			})
-			window.ui = ui
-		}
-	</script>
+
+<div id="swagger-ui"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-bundle.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.15.5/swagger-ui-standalone-preset.min.js"></script>
+
+<script>
+window.onload = function () {
+
+	const ui = SwaggerUIBundle({
+
+		url: window.location.origin + "/openapi.yaml",
+
+		dom_id: "#swagger-ui",
+
+		deepLinking: true,
+
+		docExpansion: "list",
+
+		defaultModelsExpandDepth: 1,
+
+		defaultModelExpandDepth: 2,
+
+		displayRequestDuration: true,
+
+		filter: true,
+
+		tryItOutEnabled: true,
+
+		persistAuthorization: true,
+
+		showExtensions: true,
+
+		showCommonExtensions: true,
+
+		presets: [
+			SwaggerUIBundle.presets.apis,
+			SwaggerUIStandalonePreset
+		],
+
+		plugins: [
+			SwaggerUIBundle.plugins.DownloadUrl
+		],
+
+		layout: "StandaloneLayout"
+	});
+
+	window.ui = ui;
+}
+</script>
+
 </body>
 </html>`
 }

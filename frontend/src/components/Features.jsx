@@ -1,65 +1,89 @@
 import {
-  FaLink,
+  FaBolt,
   FaChartLine,
-  FaQrcode,
   FaShieldAlt,
+  FaQrcode,
+  FaFolderOpen,
+  FaCode,
 } from "react-icons/fa";
 
 const features = [
   {
-    icon: FaLink,
-    title: "Instant Short Links",
+    icon: FaBolt,
+    title: "Fast Redirects",
     description:
-      "Create short, shareable URLs in seconds with a clean and intuitive interface.",
+      "Lightning-fast redirects powered by Redis caching for improved performance.",
   },
   {
     icon: FaChartLine,
-    title: "Click Analytics",
+    title: "Link Analytics",
     description:
-      "Track total clicks and monitor the performance of every shortened link.",
-  },
-  {
-    icon: FaQrcode,
-    title: "QR Code Support",
-    description:
-      "Generate QR codes instantly for quick sharing across devices and platforms.",
+      "Track every click and monitor the performance of your shortened URLs.",
   },
   {
     icon: FaShieldAlt,
-    title: "Secure Dashboard",
+    title: "Secure Authentication",
     description:
-      "Manage your links securely with authentication and an organized dashboard.",
+      "JWT-based authentication keeps your dashboard and links protected.",
+  },
+  {
+    icon: FaQrcode,
+    title: "QR Code Generation",
+    description:
+      "Generate QR codes instantly for every shortened URL.",
+  },
+  {
+    icon: FaFolderOpen,
+    title: "Link Management",
+    description:
+      "Search, sort, delete and organize links from one clean dashboard.",
+  },
+  {
+    icon: FaCode,
+    title: "Modern Tech Stack",
+    description:
+      "Built with Go, React, PostgreSQL, Redis and Docker using layered architecture.",
   },
 ];
 
 export default function Features() {
   return (
-    <section id="features" className="max-w-6xl mx-auto px-4 pb-24">
+    <section
+      id="features"
+      className="max-w-6xl mx-auto px-4 py-24"
+    >
+      {/* Header */}
 
-      <div className="text-center mb-14">
-        <h2 className="text-4xl font-bold">
-          Everything you need
+      <div className="text-center mb-16">
+        <h2 className="text-3xl md:text-4xl font-bold">
+          Everything You Need
         </h2>
 
-        <p className="mt-4 text-[var(--muted)] max-w-2xl mx-auto">
-          A modern URL shortener with analytics, QR generation,
-          and a beautiful dashboard for managing your links.
+        <p className="mt-4 max-w-2xl mx-auto text-[var(--muted)] leading-7">
+          Powerful features designed to make URL management simple,
+          secure and lightning fast.
         </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      {/* Cards */}
+
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
 
         {features.map((feature) => {
+
           const Icon = feature.icon;
 
           return (
+
             <div
               key={feature.title}
               className="
+                group
                 rounded-2xl
-                border border-[var(--border)]
+                border
+                border-[var(--border)]
                 bg-[var(--card)]
-                p-6
+                p-7
                 transition-all
                 duration-300
                 hover:-translate-y-2
@@ -67,28 +91,53 @@ export default function Features() {
                 hover:shadow-xl
               "
             >
+
+              {/* Icon */}
+
               <div
                 className="
-                  w-12 h-12
+                  w-14
+                  h-14
                   rounded-xl
-                  bg-[var(--hover)]
-                  flex items-center justify-center
-                  text-[var(--accent)]
-                  text-xl
+                  bg-[var(--accent-soft)]
+                  border
+                  border-[var(--border)]
+                  flex
+                  items-center
+                  justify-center
+                  transition-all
+                  duration-300
+                  group-hover:bg-[var(--accent)]
+                  group-hover:border-[var(--accent)]
                 "
               >
-                <Icon />
+                <Icon
+                  className="
+                    text-2xl
+                    text-[var(--accent)]
+                    transition-colors
+                    duration-300
+                    group-hover:text-white
+                  "
+                />
               </div>
 
-              <h3 className="mt-5 text-lg font-semibold">
+              {/* Title */}
+
+              <h3 className="mt-6 text-xl font-semibold">
                 {feature.title}
               </h3>
 
-              <p className="mt-3 text-sm leading-6 text-[var(--muted)]">
+              {/* Description */}
+
+              <p className="mt-3 leading-7 text-[var(--muted)]">
                 {feature.description}
               </p>
+
             </div>
+
           );
+
         })}
 
       </div>

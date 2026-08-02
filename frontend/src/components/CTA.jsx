@@ -1,64 +1,57 @@
+import { useNavigate } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
-import { Link } from "react-router-dom";
 
 export default function CTA() {
-  return (
-    <section className="max-w-6xl mx-auto px-4 pb-24">
+  const navigate = useNavigate();
 
-      <div
+  return (
+    <section className="max-w-4xl mx-auto px-4 py-28 text-center">
+
+      <h2 className="text-3xl md:text-4xl font-bold">
+        Ready to start managing your links?
+      </h2>
+
+      <p className="mt-6 max-w-2xl mx-auto text-[var(--muted)] leading-8">
+        Join Shorty to shorten URLs, monitor click analytics,
+        generate QR codes, and manage everything from one clean dashboard.
+      </p>
+
+      <button
+        onClick={() => navigate("/register")}
         className="
-          rounded-3xl
-          border border-[var(--border)]
-          bg-[var(--card)]
-          p-10 md:p-16
-          text-center
+          mt-10
+          inline-flex
+          items-center
+          gap-2
+          rounded-xl
+          bg-[var(--accent)]
+          px-7
+          py-3
+          text-white
+          font-medium
+          transition-all
+          duration-300
+          hover:opacity-90
+          hover:scale-105
         "
       >
-        <h2 className="text-3xl md:text-4xl font-bold">
-          Ready to simplify your links?
-        </h2>
+        Create Account
+        <FaArrowRight />
+      </button>
 
-        <p className="mt-4 max-w-2xl mx-auto text-[var(--muted)] leading-7">
-          Join Shorty to create short URLs, organize your links,
-          monitor clicks, and manage everything from a single dashboard.
-        </p>
-
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-
-          <Link
-            to="/register"
-            className="
-              inline-flex items-center gap-2
-              px-6 py-3
-              rounded-xl
-              bg-[var(--accent)]
-              text-white
-              font-medium
-              hover:opacity-90
-              transition
-            "
-          >
-            Get Started
-            <FaArrowRight />
-          </Link>
-
-          <Link
-            to="/login"
-            className="
-              inline-flex items-center
-              px-6 py-3
-              rounded-xl
-              border border-[var(--border)]
-              hover:bg-[var(--hover)]
-              transition
-            "
-          >
-            Login
-          </Link>
-
-        </div>
-
-      </div>
+      <p className="mt-6 text-sm text-[var(--muted)]">
+        Already have an account?{" "}
+        <button
+          onClick={() => navigate("/login")}
+          className="
+            text-[var(--accent)]
+            font-medium
+            hover:underline
+          "
+        >
+          Sign In
+        </button>
+      </p>
 
     </section>
   );
