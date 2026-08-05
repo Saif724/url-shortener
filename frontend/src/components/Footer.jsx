@@ -24,8 +24,8 @@ export default function Footer() {
           </h2>
 
           <p className="mt-3 max-w-md text-[var(--muted)] leading-7">
-            A modern URL Shortener & Link Management platform
-            built with Go, React, PostgreSQL and Redis.
+            A modern URL shortening and link management platform
+            with click tracking, QR code generation, and secure authentication.
           </p>
 
         </div>
@@ -55,7 +55,7 @@ export default function Footer() {
           </a>
 
           <a
-            href="mailto:your@email.com"
+            href="mailto:saifahmed724353@email.com"
             className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--accent)] transition"
           >
             <FaEnvelope />
@@ -100,7 +100,7 @@ export default function Footer() {
           <p className="flex items-center justify-center gap-2 text-sm text-[var(--muted)] flex-wrap">
             <FaCopyright className="text-xs shrink-0" />
             <span>
-              2026 Shorty. Designed & Developed by Ahsan Ahmed Saif.
+              {new Date().getFullYear()} Shorty. Designed & Developed by Ahsan Ahmed Saif.
             </span>
           </p>
 

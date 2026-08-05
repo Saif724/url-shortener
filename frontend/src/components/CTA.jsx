@@ -12,8 +12,8 @@ export default function CTA() {
       </h2>
 
       <p className="mt-6 max-w-2xl mx-auto text-[var(--muted)] leading-8">
-        Join Shorty to shorten URLs, monitor click analytics,
-        generate QR codes, and manage everything from one clean dashboard.
+        Join Shorty to shorten URLs, organize your links,
+        track total clicks, generate QR codes, and manage everything from one clean dashboard.
       </p>
 
       <button

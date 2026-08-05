@@ -1,346 +1,496 @@
-# SOFTWARE REQUIREMENTS SPECIFICATION (SRS)
+<div align="center">
 
-## Shorty – URL Shortener and Link Analytics Platform
+<img src="./frontend/public/logo.png" alt="Shorty Logo" width="120"/>
 
-**Version:** 1.0  
-**Prepared By:** Ahsan Ahmed Saif  
+# 🚀 Shorty
 
-**Frontend:** https://shorty-lyart.vercel.app  
-**Backend API:** https://shorty-offu.onrender.com  
-**API Documentation:** https://shorty-offu.onrender.com/docs  
+### Modern URL Shortener & Link Management Platform
 
----
+Fast • Secure • Scalable
 
-# 1. Introduction
+<p>
 
-## 1.1 Purpose
+<a href="https://shorty-lyart.vercel.app">
+🌐 Live Demo
+</a>
+•
+<a href="https://shorty-offu.onrender.com/docs">
+📖 API Documentation
+</a>
+•
+<a href="https://github.com/Saif724/Shorty">
+💻 Source Code
+</a>
 
-Shorty is a web-based URL shortening platform that allows users to create shortened URLs, manage links, generate QR codes, and monitor click analytics.
+</p>
 
-The platform aims to provide a fast, scalable, and user-friendly solution for shortening and tracking URLs.
+<p>
 
----
+<img src="https://img.shields.io/badge/Go-1.24-00ADD8?style=for-the-badge&logo=go"/>
 
-## 1.2 Scope
+<img src="https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react"/>
 
-The system provides:
+<img src="https://img.shields.io/badge/PostgreSQL-17-336791?style=for-the-badge&logo=postgresql"/>
 
-- User Registration  
-- User Authentication  
-- URL Shortening  
-- Click Tracking  
-- QR Code Generation  
-- Link Search  
-- Link Sorting  
-- Link Deletion  
-- Pagination  
-- Responsive Dashboard  
-- Dark/Light Theme  
-- Redis-based Caching  
+<img src="https://img.shields.io/badge/Redis-7-DC382D?style=for-the-badge&logo=redis"/>
 
----
+<img src="https://img.shields.io/badge/TailwindCSS-4-38B2AC?style=for-the-badge&logo=tailwind-css"/>
 
-## 1.3 Intended Audience
+<img src="https://img.shields.io/badge/OpenAPI-Swagger-85EA2D?style=for-the-badge&logo=swagger"/>
 
-- End Users  
-- Developers  
-- Software Engineering Instructors  
-- Project Evaluators  
+<img src="https://img.shields.io/badge/License-MIT-success?style=for-the-badge"/>
+
+</p>
+
+</div>
 
 ---
 
-# 2. Overall Description
+# 📌 Overview
 
-## 2.1 Product Perspective
+**Shorty** is a modern full-stack URL Shortener and Link Management Platform built with **Go**, **React**, **PostgreSQL**, and **Redis**.
 
-Shorty is a full-stack web application consisting of:
+The platform allows authenticated users to create shortened URLs, organize and manage links through a responsive dashboard, generate QR codes, and monitor click counts. It follows a layered backend architecture, utilizes Redis caching for improved performance, and secures all protected endpoints using JWT authentication.
 
-- React Frontend  
-- Go Backend API  
-- PostgreSQL Database  
-- Redis Cache  
-- JWT Authentication  
+Designed with scalability and simplicity in mind, Shorty demonstrates modern backend development practices while providing a clean and intuitive user experience.
 
 ---
 
-## 2.2 Product Features
+# 🖼️ Preview
 
-### Authentication
-- User Registration  
-- User Login  
-- JWT Authorization  
+<p align="center">
 
-### Link Management
-- Create Short URLs  
-- View URLs  
-- Search URLs  
-- Sort URLs  
-- Delete URLs  
+<img src="./frontend/public/landing.png" width="95%"/>
 
-### Analytics
-- Click Tracking  
-- Total URLs  
-- Total Clicks  
-- Recent URLs  
+</p>
 
-### Utilities
-- QR Code Generation  
-- Copy to Clipboard  
-- Pagination  
-- Responsive Design  
+<p align="center">
+
+<img src="./frontend/public/dashboard.png" width="95%"/>
+
+</p>
+
+<p align="center">
+
+<img src="./frontend/public/details.png" width="95%"/>
+
+</p>
 
 ---
 
-# 3. System Architecture
+# ✨ Features
 
-Frontend (React + Vercel)  
-↓  
-Backend API (Go + Render)  
-↓  
-Redis Cache + PostgreSQL Database  
+## 🔐 Authentication
 
----
-
-# 4. Functional Requirements
-
-## FR-1 User Registration
-Users shall be able to create an account.
-
-Input:
-- Email  
-- Password  
-
-Output:
-- Successful Registration  
-- Validation Errors  
+- User Registration
+- User Login
+- JWT Authentication
+- Password Hashing (bcrypt)
+- Protected API Routes
 
 ---
 
-## FR-2 User Login
-Users shall be able to authenticate.
+## 🔗 URL Management
 
-Output:
-- JWT Token  
-
----
-
-## FR-3 URL Shortening
-Users shall be able to submit a long URL.
-
-Output:
-- Unique Short URL  
+- Create Short URLs
+- Search URLs
+- Sort URLs
+- Delete URLs
+- Copy URLs
+- QR Code Generation
+- Pagination
 
 ---
 
-## FR-4 URL Redirection
-When a shortened URL is accessed:
-- Click count increases  
-- User is redirected  
+## 📊 Dashboard
+
+- Total URLs
+- Total Clicks
+- Recent URLs
+- URL Details
+- Click Count per Link
 
 ---
 
-## FR-5 View URLs
-Users shall view all URLs associated with their account.
+## ⚡ Performance
 
-Displayed:
-- Original URL  
-- Short URL  
-- Click Count  
-- Created Date  
+- Redis Caching
+- PostgreSQL Database
+- Rate Limiting
+- Optimized API Responses
 
 ---
 
-## FR-6 Search URLs
-Users shall search URLs using keywords.
+## 🎨 User Experience
+
+- Responsive Design
+- Dark / Light Theme
+- Toast Notifications
+- Loading States
+- Clean Modern Interface
 
 ---
 
-## FR-7 Sort URLs
-Sorting options:
-- Newest  
-- Oldest  
-- Most Clicked  
+# 🏗️ System Architecture
+
+Shorty follows a layered architecture that separates business logic, request handling, and data access, making the application maintainable and scalable.
+
+```text
+                    React Frontend
+                           │
+                           ▼
+                    REST API (Go)
+                           │
+                     Middleware Layer
+        (JWT • Logger • Request ID • Rate Limiter • CORS)
+                           │
+                           ▼
+                        Handlers
+                           │
+                           ▼
+                        Services
+                           │
+                           ▼
+                         Stores
+                   (Database Layer)
+                     │            │
+                     ▼            ▼
+              PostgreSQL       Redis
+```
+
+### Architecture Layers
+
+| Layer | Responsibility |
+|------|----------------|
+| Frontend | User Interface built with React |
+| Middleware | Authentication, logging, rate limiting, CORS |
+| Handler | Receives HTTP requests and returns responses |
+| Service | Business logic |
+| Store | Database operations |
+| PostgreSQL | Persistent data storage |
+| Redis | URL caching for faster redirects |
 
 ---
 
-## FR-8 QR Code Generation
-Generate QR code for shortened URLs.
-
----
-
-## FR-9 Delete URLs
-Users shall remove URLs permanently.
-
----
-
-## FR-10 Pagination
-URLs shall be displayed in pages.
-
-Limit:
-- 10 URLs per page  
-
----
-
-## FR-11 Dashboard Statistics
-Dashboard shall display:
-- Total URLs  
-- Total Clicks  
-- Recent URLs  
-
----
-
-## FR-12 Theme Management
-Support:
-- Dark Mode  
-- Light Mode  
-
----
-
-## FR-13 Redis Caching
-System shall cache frequently accessed data.
-
-Benefits:
-- Faster URL retrieval  
-- Reduced database load  
-- Improved scalability  
-
----
-
-# 5. Non-Functional Requirements
-
-## Performance
-- Dashboard load time < 3 seconds  
-- API response time < 1 second  
-
----
-
-## Scalability
-System supports:
-- Thousands of users  
-- Thousands of URLs  
-
-Redis caching reduces database load.
-
----
-
-## Security
-- JWT Authentication  
-- Password Hashing  
-- Protected Endpoints  
-- User Data Isolation  
-
----
-
-## Reliability
-- Error handling  
-- Loading states  
-- User notifications  
-
----
-
-## Usability
-- Responsive design  
-- Mobile compatibility  
-- Modern UI  
-
----
-
-# 6. Database Design
-
-## Users Table
-
-| Field | Type |
-|------|------|
-| id | TEXT (PRIMARY KEY) |
-| email | TEXT (UNIQUE, NOT NULL) |
-| password_hash | TEXT (NOT NULL) |
-| created_at | TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
-
----
-
-## URLs Table
-
-| Field | Type |
-|------|------|
-| id | TEXT (PRIMARY KEY) |
-| original_url | TEXT (NOT NULL) |
-| user_id | TEXT (NOT NULL, FOREIGN KEY) |
-| clicks | INTEGER DEFAULT 0 |
-| created_at | TIMESTAMP DEFAULT CURRENT_TIMESTAMP |
-
----
-
-### Constraints
-- users(id) PRIMARY KEY  
-- users(email) UNIQUE  
-- urls(id) PRIMARY KEY  
-- urls(user_id) FOREIGN KEY → users(id)  
-
----
-
-### Indexes
-- idx_users_email (email)  
-- idx_urls_user_id (user_id)  
-
----
-
-# 7. ER Diagram
-
-USERS (1) ─────── (N) URLS
-
-- users.id → urls.user_id  
-
----
-
-# 8. Use Case Diagram
-
-User:
-- Register  
-- Login  
-- Create URL  
-- Search URL  
-- Delete URL  
-- Generate QR  
-- View Stats  
-
----
-
-# 9. Technology Stack
+# ⚙️ Technology Stack
 
 ## Frontend
-- React.js  
-- Vite  
-- Tailwind CSS  
-- React Router DOM  
-- React Icons  
-- React Hot Toast  
+
+- React 19
+- Vite
+- Tailwind CSS
+- React Router DOM
+- React Hot Toast
+- React Icons
+
+---
 
 ## Backend
-- Go (Golang)  
-- PostgreSQL  
-- Redis  
-- JWT Authentication  
-- Swagger  
+
+- Go (Golang)
+- JWT Authentication
+- REST API
+- OpenAPI (Swagger UI)
+
+---
+
+## Database
+
+- PostgreSQL
+- Redis Cache
+
+---
 
 ## Deployment
-- Frontend: Vercel  
-- Backend: Render  
-- API Docs: Swagger  
+
+- Vercel (Frontend)
+- Render (Backend)
 
 ---
 
-# 10. Future Enhancements
+# 📂 Project Structure
 
-- Custom Alias URLs  
-- Link Expiration  
-- Public Landing Page  
-- Geographic Analytics  
-- Device Analytics  
-- Export Reports  
-- Team Collaboration  
+```text
+Shorty
+│
+├── backend
+│   ├── cmd
+│   │   └── main.go
+│   │
+│   ├── internal
+│   │   ├── cache
+│   │   ├── config
+│   │   ├── middleware
+│   │   ├── migrate
+│   │   ├── url
+│   │   └── user
+│   │
+│   ├── openapi.yaml
+│   ├── go.mod
+│   └── Dockerfile
+│
+├── frontend
+│   ├── public
+│   ├── src
+│   │   ├── api
+│   │   ├── assets
+│   │   ├── components
+│   │   ├── context
+│   │   ├── hooks
+│   │   ├── pages
+│   │   └── utils
+│   │
+│   ├── package.json
+│   └── vite.config.js
+│
+└── README.md
+```
 
 ---
 
-# 11. Conclusion
+# 🚀 Core Features
 
-Shorty is a scalable URL shortening and analytics platform built using React, Go, PostgreSQL, and Redis. It provides secure authentication, efficient URL management, real-time analytics, and high performance through caching and optimized backend design.
+- 🔐 JWT Authentication
+- 🔗 URL Shortening
+- 📊 Click Counting
+- 📱 Responsive Dashboard
+- 🌙 Dark / Light Theme
+- 📄 Swagger Documentation
+- ⚡ Redis Caching
+- 🔍 Search & Sorting
+- 📄 Pagination
+- 📋 Copy to Clipboard
+- 📱 QR Code Generation
+- 🗑️ URL Deletion
+
+---
+
+# 🔄 Request Flow
+
+```text
+User
+ │
+ ▼
+React Frontend
+ │
+ ▼
+Go REST API
+ │
+ ▼
+Authentication Middleware
+ │
+ ▼
+Business Logic
+ │
+ ├─────────────► Redis Cache
+ │
+ ▼
+PostgreSQL
+ │
+ ▼
+JSON Response
+ │
+ ▼
+Frontend
+```
+
+---
+
+# ⚙️ Getting Started
+
+## Prerequisites
+
+Before running the project, make sure you have the following installed:
+
+- Go 1.24+
+- Node.js 20+
+- PostgreSQL
+- Redis
+- Git
+
+---
+
+# 📥 Installation
+
+## Clone the repository
+
+```bash
+git clone https://github.com/Saif724/Shorty.git
+
+cd Shorty
+```
+
+---
+
+## Backend Setup
+
+```bash
+cd backend
+
+go mod download
+
+go run cmd/main.go
+```
+
+The backend will start on:
+
+```
+http://localhost:8080
+```
+
+---
+
+## Frontend Setup
+
+```bash
+cd frontend
+
+npm install
+
+npm run dev
+```
+
+The frontend will start on:
+
+```
+http://localhost:5173
+```
+
+---
+
+# 🔑 Environment Variables
+
+Create a `.env` file inside the **backend** directory.
+
+```env
+PORT=8080
+
+DB_URL=postgres://username:password@localhost:5432/shorty?sslmode=disable
+
+REDIS_URL=redis://localhost:6379
+
+JWT_SECRET=your_secret_key
+```
+
+---
+
+# 📖 API Reference
+
+| Method | Endpoint | Description |
+|---------|----------|-------------|
+| POST | `/register` | Register a new user |
+| POST | `/login` | Authenticate user |
+| POST | `/shorten` | Create a short URL |
+| GET | `/r/{id}` | Redirect to original URL |
+| GET | `/user/urls` | Get all user URLs |
+| DELETE | `/user/urls/{id}` | Delete a URL |
+
+---
+
+# 📚 API Documentation
+
+Interactive Swagger documentation is available at:
+
+### Production
+
+https://shorty-offu.onrender.com/docs
+
+### Local
+
+http://localhost:8080/docs
+
+---
+
+# 🚀 Deployment
+
+| Service | Platform |
+|----------|----------|
+| Frontend | Vercel |
+| Backend | Render |
+| Database | PostgreSQL |
+| Cache | Redis |
+
+---
+
+# 🛣️ Roadmap
+
+## ✅ Completed
+
+- JWT Authentication
+- URL Shortening
+- Click Tracking
+- Dashboard
+- URL Details
+- QR Code Generation
+- Search URLs
+- Sort URLs
+- Pagination
+- Redis Caching
+- Rate Limiting
+- Swagger Documentation
+- Responsive Design
+- Dark / Light Theme
+
+---
+
+## 🔮 Planned Features
+
+- Custom URL Aliases
+- Link Expiration
+- Advanced Click Analytics
+- Geographic Analytics
+- Device Analytics
+- Export Reports
+- Team Workspaces
+- Admin Dashboard
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create a feature branch
+
+```bash
+git checkout -b feature/your-feature
+```
+
+3. Commit your changes
+
+```bash
+git commit -m "Add new feature"
+```
+
+4. Push to your branch
+
+```bash
+git push origin feature/your-feature
+```
+
+5. Open a Pull Request
+
+---
+
+# 👨‍💻 Author
+
+**Ahsan Ahmed Saif**
+
+- GitHub: https://github.com/Saif724
+
+---
+
+# ⭐ Support
+
+If you found this project helpful, consider giving it a ⭐ on GitHub.
+
+It helps others discover the project and motivates future development.
+
+---
+
+# 📄 License
+
+This project is licensed under the MIT License.
+
+See the `LICENSE` file for more information.

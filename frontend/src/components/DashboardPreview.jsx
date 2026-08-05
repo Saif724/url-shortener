@@ -8,8 +8,8 @@ export default function DashboardPreview() {
         </h2>
 
         <p className="mt-4 text-[var(--muted)] max-w-2xl mx-auto leading-7">
-          Manage links, monitor analytics, generate QR codes, and organize
-          everything from one clean, modern dashboard.
+          Create, organize, and manage your shortened links from one clean dashboard,
+          complete with click counts and QR code generation.
         </p>
       </div>
 

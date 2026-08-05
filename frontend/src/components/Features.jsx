@@ -16,9 +16,9 @@ const features = [
   },
   {
     icon: FaChartLine,
-    title: "Link Analytics",
+    title: "Click Tracking",
     description:
-      "Track every click and monitor the performance of your shortened URLs.",
+      "Monitor total clicks for every shortened URL directly from your dashboard.",
   },
   {
     icon: FaShieldAlt,
@@ -36,7 +36,7 @@ const features = [
     icon: FaFolderOpen,
     title: "Link Management",
     description:
-      "Search, sort, delete and organize links from one clean dashboard.",
+      "Search, sort, delete, copy and organize all your shortened links from one dashboard.",
   },
   {
     icon: FaCode,
@@ -60,8 +60,7 @@ export default function Features() {
         </h2>
 
         <p className="mt-4 max-w-2xl mx-auto text-[var(--muted)] leading-7">
-          Powerful features designed to make URL management simple,
-          secure and lightning fast.
+          Powerful features for creating, managing and sharing short URLs with secure authentication and high performance.
         </p>
       </div>
 

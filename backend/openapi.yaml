@@ -11,7 +11,7 @@ info:
     - JWT Authentication
     - URL Shortening
     - Link Management
-    - Click Analytics
+    - Link Statistics
     - Redis Caching
     - Rate Limiting
     - RESTful API

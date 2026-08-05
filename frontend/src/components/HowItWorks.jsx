@@ -19,9 +19,9 @@ const steps = [
   },
   {
     icon: FaChartLine,
-    title: "Track Analytics",
+    title: "Manage Links",
     description:
-      "Manage links, monitor clicks, and generate QR codes from one dashboard.",
+      "View click counts, copy links, generate QR codes, and organize all your shortened links from one dashboard.",
   },
 ];
 
@@ -38,7 +38,7 @@ export default function HowItWorks() {
         </h2>
 
         <p className="mt-4 text-[var(--muted)] max-w-2xl mx-auto">
-          Create and manage short links in just three simple steps.
+          Create, shorten, and manage your links in just three simple steps.
         </p>
       </div>
 

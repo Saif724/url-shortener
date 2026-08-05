@@ -72,7 +72,7 @@ export default function UrlCard({ u, onCopy, onDelete, onQR, API_BASE, copied })
           "
         >
           <FaChartBar />
-          Analytics
+          Details
           <FaArrowRight />
         </button>
       </div>
