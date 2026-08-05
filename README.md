@@ -66,7 +66,7 @@ Designed with scalability and simplicity in mind, Shorty demonstrates modern bac
 
 <p align="center">
 
-<img src="./frontend/public/dashboard.png" width="95%"/>
+<img src="./frontend/public/dashboard-preview.png" width="95%"/>
 
 </p>
 
