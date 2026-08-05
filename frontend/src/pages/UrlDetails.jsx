@@ -1,6 +1,14 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { FaArrowLeft, FaCopy, FaLink, FaChartLine } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaCopy,
+  FaLink,
+  FaMousePointer,
+  FaCalendarAlt,
+  FaChartLine,
+  FaExternalLinkAlt,
+} from "react-icons/fa";
 import API_BASE from "../api/api";
 import toast from "react-hot-toast";
 
@@ -29,10 +37,10 @@ export default function UrlDetails() {
           : [];
 
         const found = list.find((u) => String(u.id) === String(id));
+
         setUrlData(found);
-      } catch (err) {
-        console.log(err);
-        toast.error("Failed to load analytics");
+      } catch {
+        toast.error("Failed to load URL");
       }
     };
 
@@ -46,39 +54,26 @@ export default function UrlDetails() {
 
   if (!urlData) {
     return (
-      <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] p-6">
-        <div className="max-w-3xl mx-auto">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--text)] transition mb-6"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-
-          <div className="text-center text-[var(--muted)] mt-20">
-            Loading analytics...
-          </div>
-        </div>
+      <div className="min-h-screen bg-[var(--bg)] flex items-center justify-center">
+        <p className="text-[var(--muted)]">Loading...</p>
       </div>
     );
   }
 
   const clicks = Number(urlData.clicks) || 0;
 
-  // REALISTIC STATUS (no fake insights)
   const status =
     clicks === 0
-      ? "No activity"
+      ? "No Activity"
       : clicks < 10
-      ? "Starting"
+      ? "Low Traffic"
       : clicks < 50
       ? "Growing"
-      : "Performing well";
+      : "Popular";
 
   const statusColor =
     clicks === 0
-      ? "text-[var(--muted)]"
+      ? "text-gray-400"
       : clicks < 10
       ? "text-yellow-400"
       : clicks < 50
@@ -87,102 +82,176 @@ export default function UrlDetails() {
 
   return (
     <div className="min-h-screen bg-[var(--bg)] text-[var(--text)] px-4 py-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+      <div className="max-w-5xl mx-auto space-y-8">
 
-        {/* HEADER */}
-        <div className="space-y-3">
-          <div className="text-xs text-[var(--muted)]">
-            Dashboard / URL Details
-          </div>
+        {/* Header */}
 
+        <div>
           <button
             onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-[var(--muted)] hover:text-[var(--text)] transition"
           >
             <FaArrowLeft />
-            <span className="text-sm">Back</span>
+            Back
           </button>
+
+          <h1 className="text-3xl font-bold mt-4">
+            Link Details
+          </h1>
+
+          <p className="text-[var(--muted)] mt-2">
+            View information about this shortened link.
+          </p>
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Stats */}
 
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
-            <p className="text-[var(--muted)] text-sm">Total Clicks</p>
-            <h2 className="text-3xl font-bold mt-2">{clicks}</h2>
+        <div className="grid md:grid-cols-3 gap-5">
+
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+
+            <FaMousePointer className="text-blue-500 text-2xl" />
+
+            <p className="text-[var(--muted)] mt-4">
+              Total Clicks
+            </p>
+
+            <h2 className="text-4xl font-bold mt-2">
+              {clicks}
+            </h2>
+
           </div>
 
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
-            <p className="text-[var(--muted)] text-sm">Status</p>
-            <h2 className={`text-lg font-semibold mt-2 ${statusColor}`}>
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+
+            <FaCalendarAlt className="text-green-500 text-2xl" />
+
+            <p className="text-[var(--muted)] mt-4">
+              Created
+            </p>
+
+            <h2 className="font-semibold mt-2">
+              {new Date(urlData.created_at).toLocaleDateString()}
+            </h2>
+
+          </div>
+
+          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+
+            <FaChartLine className="text-purple-500 text-2xl" />
+
+            <p className="text-[var(--muted)] mt-4">
+              Status
+            </p>
+
+            <h2 className={`font-semibold mt-2 ${statusColor}`}>
               {status}
             </h2>
-          </div>
 
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 flex flex-col justify-center">
-            <p className="text-[var(--muted)] text-sm">Analytics</p>
-            <FaChartLine className="text-2xl mt-3 text-blue-400" />
-            <p className="text-xs text-[var(--muted)] mt-2">
-              Only total clicks are tracked
-            </p>
           </div>
 
         </div>
 
-        {/* NO FAKE CHART */}
-        <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 text-center">
-          <FaChartLine className="text-3xl mx-auto mb-3 opacity-40" />
-          <p className="text-[var(--text)] font-medium">
-            Click analytics
+        {/* Original URL */}
+
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+
+          <div className="flex justify-between items-center">
+
+            <h3 className="font-semibold">
+              Original URL
+            </h3>
+
+            <button
+              onClick={() => copy(urlData.url)}
+              className="hover:text-[var(--accent)]"
+            >
+              <FaCopy />
+            </button>
+
+          </div>
+
+          <p className="break-all mt-4 text-[var(--muted)]">
+            {urlData.url}
           </p>
-          <p className="text-sm text-[var(--muted)] mt-2">
-            Detailed analytics (time, device, location) are not available yet.
+
+        </div>
+
+        {/* Short URL */}
+
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+
+          <div className="flex justify-between items-center">
+
+            <h3 className="font-semibold">
+              Short URL
+            </h3>
+
+            <button
+              onClick={() => copy(shortUrl)}
+              className="hover:text-[var(--accent)]"
+            >
+              <FaCopy />
+            </button>
+
+          </div>
+
+          <div className="mt-4 flex items-center gap-3">
+
+            <FaLink className="text-blue-500" />
+
+            <a
+              href={shortUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-500 underline break-all"
+            >
+              {shortUrl}
+            </a>
+
+            <FaExternalLinkAlt className="text-xs text-[var(--muted)]" />
+
+          </div>
+
+        </div>
+
+        {/* Summary */}
+
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+
+          <h3 className="font-semibold mb-4">
+            Performance Summary
+          </h3>
+
+          <p className="text-[var(--muted)] leading-7">
+
+            This shortened URL has received{" "}
+            <span className="font-semibold text-[var(--text)]">
+              {clicks}
+            </span>{" "}
+            click{clicks !== 1 && "s"} since it was created on{" "}
+            <span className="font-semibold text-[var(--text)]">
+              {new Date(urlData.created_at).toLocaleDateString()}
+            </span>.
+
+            {clicks === 0 &&
+              " This link hasn't been visited yet."}
+
+            {clicks > 0 &&
+              clicks < 10 &&
+              " The link has started receiving traffic."}
+
+            {clicks >= 10 &&
+              clicks < 50 &&
+              " The link is receiving a healthy number of visits."}
+
+            {clicks >= 50 &&
+              " This link is performing well with strong engagement."}
+
           </p>
-        </div>
-
-        {/* URL INFO */}
-        <div className="space-y-4">
-
-          {/* ORIGINAL URL */}
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
-            <div className="flex justify-between items-center">
-              <p className="text-[var(--muted)] text-sm">Original URL</p>
-              <button
-                onClick={() => copy(urlData.url)}
-                className="text-[var(--muted)] hover:text-[var(--text)]"
-              >
-                <FaCopy />
-              </button>
-            </div>
-            <p className="break-words mt-2">{urlData.url}</p>
-          </div>
-
-          {/* SHORT URL */}
-          <div className="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
-            <div className="flex justify-between items-center">
-              <p className="text-[var(--muted)] text-sm">Short URL</p>
-              <button
-                onClick={() => copy(shortUrl)}
-                className="text-[var(--muted)] hover:text-[var(--text)]"
-              >
-                <FaCopy />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2 mt-2">
-              <FaLink className="text-blue-400" />
-              <a
-                href={shortUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-400 hover:text-blue-300 underline"
-              >
-                {shortUrl}
-              </a>
-            </div>
-          </div>
 
         </div>
+
       </div>
     </div>
   );
