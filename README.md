@@ -315,7 +315,7 @@ Before running the project, make sure you have the following installed:
 ## Clone the repository
 
 ```bash
-git clone https://github.com/Saif724/Shorty.git
+git clone https://github.com/Saif724/url-shortener.git
 
 cd Shorty
 ```
